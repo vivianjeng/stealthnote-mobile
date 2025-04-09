@@ -1,108 +1,68 @@
-# Mopro example app
+# Noir with Mopro
 
-This is the example app of mopro. You can use the following commands to build native bindings for your iOS and/or Android app.
+This project demonstrates how to integrate a Noir circuit with the mopro CLI to generate platform bindings.
+See how to install mopro CLI: [Getting started](https://zkmopro.org/docs/getting-started).
 
-**📚 To learn more about mopro, visit: https://zkmopro.org**
+## 🔧 Build the Bindings
 
-## Getting Started
+### iOS
 
-To set up and build bindings, follow these steps.
-
-### 1. Install the Mopro CLI Tool
-
-```sh
-git clone https://github.com/zkmopro/mopro
-cd mopro/cli
-cargo install --path .
-```
-
-### 2. Initialize adapter
-
-Navigate to the Mopro example app directory and initialize setup by running:
-
-```sh
-mopro init
-```
-
-### 3. Generate Native Bindings
-
-Build bindings for your project by executing:
+Run
 
 ```sh
 mopro build
 ```
 
-### 4. Create Platform-Specific Templates
+and select `aarch64-apple-ios`
 
-To generate templates tailored to your target platform, use:
+### Android
 
-```sh
-mopro create
+Activate `android-compat` feature in [Cargo.toml](./Cargo.toml).
+
+```diff
+- noir = { path = "../noir-rs/noir", features = ["barretenberg"] }
++ noir = { path = "../noir-rs/noir", features = ["barretenberg", "android-compat"] }
 ```
 
-### 5. Open the project
+Run
+
+```sh
+mopro build
+```
+
+and select `aarch64-linux-android`
+
+## 🔄 Manually Update Bindings
+
+### iOS
+
+Copy the generated `MoproiOSBindings` directory into your iOS project:
+
+```sh
+cp -r MoproiOSBindings ios/MoproiOSBindings
+```
+
+### Android
+
+Copy the generated files into your Android project:
+
+```sh
+cp -r MoproAndroidBindings/uniffi android/app/src/main/java/uniffi
+cp -r MoproAndroidBindings/jniLibs android/app/src/main/jniLibs
+```
+
+## 📂 Open the project
 
 Follow the instructions to open the development tools
 
 For iOS:
+
 ```sh
 open ios/MoproApp.xcodeproj
 ```
 
 For Android:
+
 ```sh
 open android -a Android\ Studio
 ```
-
-For Web:
-```sh
-cd web && yarn && yarn start
-```
-
-For React Native:
-Follow the README in the `react-native` directory. Or [zkmopro/react-native-app/README.md](https://github.com/zkmopro/react-native-app/blob/main/README.md)
-
-For Flutter:
-Follow the README in the `flutter` directory. Or [zkmopro/flutter-app/README.md](https://github.com/zkmopro/flutter-app/blob/main/README.md)
-
-## Advanced: Customize Builds Using Rust
-
-For advanced usage, you can manually run Rust commands to build in either debug or release mode.
-
-### iOS
-
-- Debug Mode:
-    ```sh
-    cargo run --bin ios  # Debug mode
-    ```
-- Release Mode:
-    ```sh
-    CONFIGURATION=release cargo run --bin ios # Release mode
-    ```
-
-### Android
-
-- Debug Mode:
-    ```sh
-    cargo run --bin android  # Debug mode
-    ```
-- Release Mode:
-    ```sh
-    CONFIGURATION=release cargo run --bin android # Release mode
-    ```
-
-### Web
-
-- Debug Mode:
-    ```sh
-    cargo run --bin web  # Debug mode
-    ```
-- Release Mode:
-    ```sh
-    CONFIGURATION=release cargo run --bin web # Release mode
-    ```
-
-## Community
-
--   X account: <a href="https://twitter.com/zkmopro"><img src="https://img.shields.io/twitter/follow/zkmopro?style=flat-square&logo=x&label=zkmopro"></a>
--   Telegram group: <a href="https://t.me/zkmopro"><img src="https://img.shields.io/badge/telegram-@zkmopro-blue.svg?style=flat-square&logo=telegram"></a>
