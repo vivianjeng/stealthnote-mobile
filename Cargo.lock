@@ -397,6 +397,7 @@ dependencies = [
 [[package]]
 name = "bb"
 version = "0.1.0"
+source = "git+https://github.com/zkmopro/noir-rs#ef93caaef8dc6ba6fa73cb523d36282ab720837d"
 dependencies = [
  "num-bigint",
  "thiserror 1.0.69",
@@ -1841,6 +1842,7 @@ dependencies = [
 [[package]]
 name = "noir"
 version = "0.1.0"
+source = "git+https://github.com/zkmopro/noir-rs#ef93caaef8dc6ba6fa73cb523d36282ab720837d"
 dependencies = [
  "acir",
  "acvm",
@@ -1852,6 +1854,7 @@ dependencies = [
  "flate2",
  "hex",
  "nargo",
+ "openssl",
  "reqwest",
  "serde",
  "serde_json",
@@ -2114,6 +2117,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 
 [[package]]
+name = "openssl-src"
+version = "300.5.0+3.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8ce546f549326b0e6052b649198487d91320875da901e7bd11a06d1ee3f9c2f"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2121,6 +2133,7 @@ checksum = "8288979acd84749c744a9014b4382d42b8f7b2592847b5afb2ed29e5d16ede07"
 dependencies = [
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]

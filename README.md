@@ -20,8 +20,8 @@ and select `aarch64-apple-ios`
 Activate `android-compat` feature in [Cargo.toml](./Cargo.toml).
 
 ```diff
-- noir = { path = "../noir-rs/noir", features = ["barretenberg"] }
-+ noir = { path = "../noir-rs/noir", features = ["barretenberg", "android-compat"] }
+- noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg"] }
++ noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg", "android-compat"] }
 ```
 
 Run
@@ -39,7 +39,7 @@ and select `aarch64-linux-android`
 Copy the generated `MoproiOSBindings` directory into your iOS project:
 
 ```sh
-cp -r MoproiOSBindings ios/MoproiOSBindings
+cp -r MoproiOSBindings ios
 ```
 
 ### Android
@@ -47,8 +47,8 @@ cp -r MoproiOSBindings ios/MoproiOSBindings
 Copy the generated files into your Android project:
 
 ```sh
-cp -r MoproAndroidBindings/uniffi android/app/src/main/java/uniffi
-cp -r MoproAndroidBindings/jniLibs android/app/src/main/jniLibs
+cp -r MoproAndroidBindings/uniffi android/app/src/main/java
+cp -r MoproAndroidBindings/jniLibs android/app/src/main
 ```
 
 ## 📂 Open the project
