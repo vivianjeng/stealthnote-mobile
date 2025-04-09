@@ -1,0 +1,4 @@
+[toolchain]
+channel = "stable"
+components = [ "rustfmt" ]
+version = "1.81.0"

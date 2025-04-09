@@ -1,0 +1,5 @@
+target_adapters = []
+target_platforms = [
+    "ios",
+    "android",
+]
