@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2A5992392CC77A7E00135402 /* MoproBindings.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A5992372CC77A7E00135402 /* MoproBindings.xcframework */; };
-		2A59923A2CC77A7E00135402 /* mopro.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5992362CC77A7E00135402 /* mopro.swift */; };
+		E1F937F92DA79CCC00CDDD6A /* MoproBindings.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1F937F72DA79CCC00CDDD6A /* MoproBindings.xcframework */; };
+		E1F937FA2DA79CCC00CDDD6A /* mopro.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F937F62DA79CCC00CDDD6A /* mopro.swift */; };
+		E1F938032DA7A1BE00CDDD6A /* srs.local in Resources */ = {isa = PBXBuildFile; fileRef = E1F938002DA7A1BE00CDDD6A /* srs.local */; };
+		E1F938042DA7A1BE00CDDD6A /* zkemail_input.json in Resources */ = {isa = PBXBuildFile; fileRef = E1F938012DA7A1BE00CDDD6A /* zkemail_input.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,8 +34,10 @@
 		2A5991EC2CC7722900135402 /* MoproApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoproApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5991FC2CC7722A00135402 /* MoproAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoproAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5992062CC7722A00135402 /* MoproAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoproAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A5992362CC77A7E00135402 /* mopro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mopro.swift; sourceTree = "<group>"; };
-		2A5992372CC77A7E00135402 /* MoproBindings.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = MoproBindings.xcframework; sourceTree = "<group>"; };
+		E1F937F62DA79CCC00CDDD6A /* mopro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mopro.swift; sourceTree = "<group>"; };
+		E1F937F72DA79CCC00CDDD6A /* MoproBindings.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = MoproBindings.xcframework; sourceTree = "<group>"; };
+		E1F938002DA7A1BE00CDDD6A /* srs.local */ = {isa = PBXFileReference; lastKnownFileType = file; path = srs.local; sourceTree = "<group>"; };
+		E1F938012DA7A1BE00CDDD6A /* zkemail_input.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = zkemail_input.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -59,7 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2A5992392CC77A7E00135402 /* MoproBindings.xcframework in Frameworks */,
+				E1F937F92DA79CCC00CDDD6A /* MoproBindings.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,11 +87,12 @@
 		2A5991E32CC7722900135402 = {
 			isa = PBXGroup;
 			children = (
+				E1F938022DA7A1BE00CDDD6A /* public */,
 				2A5991EE2CC7722900135402 /* MoproApp */,
 				2A5991FF2CC7722A00135402 /* MoproAppTests */,
 				2A5992092CC7722A00135402 /* MoproAppUITests */,
 				2A5991ED2CC7722900135402 /* Products */,
-				2A5992382CC77A7E00135402 /* MoproiOSBindings */,
+				E1F937F82DA79CCC00CDDD6A /* MoproiOSBindings */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,13 +106,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2A5992382CC77A7E00135402 /* MoproiOSBindings */ = {
+		E1F937F82DA79CCC00CDDD6A /* MoproiOSBindings */ = {
 			isa = PBXGroup;
 			children = (
-				2A5992362CC77A7E00135402 /* mopro.swift */,
-				2A5992372CC77A7E00135402 /* MoproBindings.xcframework */,
+				E1F937F62DA79CCC00CDDD6A /* mopro.swift */,
+				E1F937F72DA79CCC00CDDD6A /* MoproBindings.xcframework */,
 			);
 			path = MoproiOSBindings;
+			sourceTree = "<group>";
+		};
+		E1F938022DA7A1BE00CDDD6A /* public */ = {
+			isa = PBXGroup;
+			children = (
+				E1F938002DA7A1BE00CDDD6A /* srs.local */,
+				E1F938012DA7A1BE00CDDD6A /* zkemail_input.json */,
+			);
+			path = public;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -230,6 +244,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1F938032DA7A1BE00CDDD6A /* srs.local in Resources */,
+				E1F938042DA7A1BE00CDDD6A /* zkemail_input.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,7 +270,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2A59923A2CC77A7E00135402 /* mopro.swift in Sources */,
+				E1F937FA2DA79CCC00CDDD6A /* mopro.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,7 +433,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MoproApp/Preview Content\"";
-				DEVELOPMENT_TEAM = N3ESL929H7;
+				DEVELOPMENT_TEAM = 73H2G4S25V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -446,7 +462,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MoproApp/Preview Content\"";
-				DEVELOPMENT_TEAM = N3ESL929H7;
+				DEVELOPMENT_TEAM = 73H2G4S25V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

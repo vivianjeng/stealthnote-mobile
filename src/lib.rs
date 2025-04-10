@@ -120,15 +120,17 @@ pub fn verify_zkemail(srs_path: String, proof: Vec<u8>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
     use serde::Deserialize;
+    use std::fs;
 
     #[test]
+    #[serial_test::serial]
     fn test_prove() {
         assert!(prove());
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_prove_verify_zkemail() {
         // Define a path for the SRS file for testing
         let srs_path = "public/srs.local".to_string();
@@ -147,27 +149,71 @@ mod tests {
             from_header_sequence: SequenceTest,
             from_address_sequence: SequenceTest,
         }
-        #[derive(Deserialize, Debug)] struct HeaderTest { storage: Vec<u8>, len: u32 }
-        #[derive(Deserialize, Debug)] struct PubKeyTest { modulus: Vec<String>, redc: Vec<String> }
-        #[derive(Deserialize, Debug)] struct SequenceTest { index: u32, length: u32 }
+        #[derive(Deserialize, Debug)]
+        struct HeaderTest {
+            storage: Vec<u8>,
+            len: u32,
+        }
+        #[derive(Deserialize, Debug)]
+        struct PubKeyTest {
+            modulus: Vec<String>,
+            redc: Vec<String>,
+        }
+        #[derive(Deserialize, Debug)]
+        struct SequenceTest {
+            index: u32,
+            length: u32,
+        }
 
-        let input_data: ZkEmailInputTest = serde_json::from_str(&json_str)
-            .expect("Failed to parse zkemail_input.json for test");
+        let input_data: ZkEmailInputTest =
+            serde_json::from_str(&json_str).expect("Failed to parse zkemail_input.json for test");
 
         // Convert loaded data into the HashMap format required by prove_zkemail
         let mut inputs: HashMap<String, Vec<String>> = HashMap::new();
-        inputs.insert("header_storage".to_string(), input_data.header.storage.iter().map(|b| b.to_string()).collect());
-        inputs.insert("header_len".to_string(), vec![input_data.header.len.to_string()]);
+        inputs.insert(
+            "header_storage".to_string(),
+            input_data
+                .header
+                .storage
+                .iter()
+                .map(|b| b.to_string())
+                .collect(),
+        );
+        inputs.insert(
+            "header_len".to_string(),
+            vec![input_data.header.len.to_string()],
+        );
         inputs.insert("pubkey_modulus".to_string(), input_data.pubkey.modulus);
         inputs.insert("pubkey_redc".to_string(), input_data.pubkey.redc);
         inputs.insert("signature".to_string(), input_data.signature);
-        inputs.insert("date_index".to_string(), vec![input_data.date_index.to_string()]);
-        inputs.insert("subject_index".to_string(), vec![input_data.subject_sequence.index.to_string()]);
-        inputs.insert("subject_length".to_string(), vec![input_data.subject_sequence.length.to_string()]);
-        inputs.insert("from_header_index".to_string(), vec![input_data.from_header_sequence.index.to_string()]);
-        inputs.insert("from_header_length".to_string(), vec![input_data.from_header_sequence.length.to_string()]);
-        inputs.insert("from_address_index".to_string(), vec![input_data.from_address_sequence.index.to_string()]);
-        inputs.insert("from_address_length".to_string(), vec![input_data.from_address_sequence.length.to_string()]);
+        inputs.insert(
+            "date_index".to_string(),
+            vec![input_data.date_index.to_string()],
+        );
+        inputs.insert(
+            "subject_index".to_string(),
+            vec![input_data.subject_sequence.index.to_string()],
+        );
+        inputs.insert(
+            "subject_length".to_string(),
+            vec![input_data.subject_sequence.length.to_string()],
+        );
+        inputs.insert(
+            "from_header_index".to_string(),
+            vec![input_data.from_header_sequence.index.to_string()],
+        );
+        inputs.insert(
+            "from_header_length".to_string(),
+            vec![input_data.from_header_sequence.length.to_string()],
+        );
+        inputs.insert(
+            "from_address_index".to_string(),
+            vec![input_data.from_address_sequence.index.to_string()],
+        );
+        inputs.insert(
+            "from_address_length".to_string(),
+            vec![input_data.from_address_sequence.length.to_string()],
+        );
 
         // Call prove_zkemail
         let proof = prove_zkemail(srs_path.clone(), inputs);
