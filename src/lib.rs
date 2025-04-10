@@ -1,6 +1,5 @@
 // Here we're calling a macro exported with Uniffi. This macro will
-// write some functions and bind them to FFI type. These
-// functions will invoke the `get_circom_wtns_fn` generated below.
+// write some functions and bind them to FFI type
 mopro_ffi::app!();
 
 use noir::{
@@ -20,7 +19,7 @@ use std::{fs, path::Path};
 struct ZkEmailInput {
     header: Header,
     pubkey: PubKey,
-    signature: Vec<String>, // Vec of hex strings "0x..."
+    signature: Vec<String>,
     date_index: u32,
     subject_sequence: Sequence,
     from_header_sequence: Sequence,
@@ -29,14 +28,14 @@ struct ZkEmailInput {
 
 #[derive(Deserialize, Debug)]
 struct Header {
-    storage: Vec<u8>, // Array of u8 values
+    storage: Vec<u8>,
     len: u32,
 }
 
 #[derive(Deserialize, Debug)]
 struct PubKey {
-    modulus: Vec<String>, // Vec of hex strings "0x..."
-    redc: Vec<String>,    // Vec of hex strings "0x..."
+    modulus: Vec<String>,
+    redc: Vec<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -86,96 +85,53 @@ pub fn prove() -> bool {
 }
 
 #[uniffi::export]
-pub fn zk_email_proof() -> bool {
+pub fn zkemail_prove() -> bool {
     const ZKEMAIL_JSON: &str = include_str!("../circuit/zkemail_test.json");
 
     let bytecode_json: serde_json::Value = serde_json::from_str(&ZKEMAIL_JSON).unwrap();
-    let bytecode = {
-        let bytecode = bytecode_json["bytecode"].as_str().unwrap();
-        bytecode.trim_end_matches('=')
-    };
-    // Remove the trailing '=' character from the bytecode if present
-    println!("Bytecode: {:?}", bytecode);
+    let bytecode = bytecode_json["bytecode"].as_str().unwrap();
 
     // Setup the SRS
     // You can provide a path to the SRS transcript file as second argument
     // Otherwise it will be downloaded automatically from Aztec's servers
     setup_srs_from_bytecode(bytecode, Some("public/srs.local"), false).unwrap();
 
-    println!("OOK");
-
     let input_data = match load_zkemail_input("public/zkemail_input.json") {
         Ok(data) => {
-            println!("Successfully loaded zkEmail input.");
+            println!("Successfully loaded zkEmail input");
             data
         }
         Err(e) => {
             eprintln!("Error loading zkEmail input: {}", e);
-            return false; // Return false on error
-        }
-    };
-
-    println!("input data: {:?}", input_data);
-
-    let mut witness_vec: Vec<String> = Vec::new();
-
-    // Flatten ZkEmailInput into witness_vec
-    // Order follows struct definition: header, pubkey, signature, date_index, subject_sequence, from_header_sequence, from_address_sequence
-
-    // 1. Header
-    witness_vec.extend(
-        input_data
-            .header
-            .storage
-            .iter()
-            .map(|byte| format!("0x{:x}", byte)),
-    );
-    witness_vec.push(format!("0x{:x}", input_data.header.len));
-
-    // 2. PubKey
-    // Assuming these are already "0x..." hex strings from JSON
-    witness_vec.extend(input_data.pubkey.modulus.iter().cloned());
-    witness_vec.extend(input_data.pubkey.redc.iter().cloned());
-
-    // 3. Signature
-    // Assuming these are already "0x..." hex strings from JSON
-    witness_vec.extend(input_data.signature.iter().cloned());
-
-    // 4. Date Index
-    witness_vec.push(format!("0x{:x}", input_data.date_index));
-
-    // 5. Subject Sequence
-    witness_vec.push(format!("0x{:x}", input_data.subject_sequence.index));
-    witness_vec.push(format!("0x{:x}", input_data.subject_sequence.length));
-
-    // 6. From Header Sequence
-    witness_vec.push(format!("0x{:x}", input_data.from_header_sequence.index));
-    witness_vec.push(format!("0x{:x}", input_data.from_header_sequence.length));
-
-    // 7. From Address Sequence
-    witness_vec.push(format!("0x{:x}", input_data.from_address_sequence.index));
-    witness_vec.push(format!("0x{:x}", input_data.from_address_sequence.length));
-
-    println!("Flattened witness vector: {:?}", witness_vec);
-
-    let witness_slices: Vec<&str> = witness_vec.iter().map(|s| s.as_str()).collect();
-
-    let initial_witness = match from_vec_str_to_witness_map(witness_slices) {
-        Ok(map) => map,
-        Err(e) => {
-            eprintln!("Error creating witness map: {}", e);
             return false;
         }
     };
 
-    // let initial_witness = from_vec_str_to_witness_map(vec!["5", "6", "0x1e"]).unwrap(); // Keep this commented out
+    let mut witness_vec_string: Vec<String> = Vec::new();
+
+    // Populate witness vector from input_data
+    witness_vec_string.extend(input_data.header.storage.iter().map(|byte| byte.to_string()));
+    witness_vec_string.push(input_data.header.len.to_string());
+    witness_vec_string.extend(input_data.pubkey.modulus.iter().cloned());
+    witness_vec_string.extend(input_data.pubkey.redc.iter().cloned());
+    witness_vec_string.extend(input_data.signature.iter().cloned());
+    witness_vec_string.push(input_data.date_index.to_string());
+    witness_vec_string.push(input_data.subject_sequence.index.to_string());
+    witness_vec_string.push(input_data.subject_sequence.length.to_string());
+    witness_vec_string.push(input_data.from_header_sequence.index.to_string());
+    witness_vec_string.push(input_data.from_header_sequence.length.to_string());
+    witness_vec_string.push(input_data.from_address_sequence.index.to_string());
+    witness_vec_string.push(input_data.from_address_sequence.length.to_string());
+
+    // Convert Vec<String> to Vec<&str> for the function call
+    let witness_vec_str: Vec<&str> = witness_vec_string.iter().map(AsRef::as_ref).collect();
+
+    let initial_witness = from_vec_str_to_witness_map(witness_vec_str).unwrap();
 
     // Start timing the proof generation
     let start = std::time::Instant::now();
-    // Generate the proof
-    // It returns the proof
+
     let proof = prove_ultra_honk(bytecode, initial_witness, false).unwrap();
-    // Print the time it took to generate the proof
     println!("Proof generation time: {:?}", start.elapsed());
 
     // Get the verification key
@@ -183,7 +139,6 @@ pub fn zk_email_proof() -> bool {
 
     // Verify the proof
     let verdict = verify_ultra_honk(proof, vk).unwrap();
-    // Print the verdict
     println!("Proof verification verdict: {}", verdict);
     return verdict;
 }
@@ -198,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn test_zk_email_proof() {
-        assert!(zk_email_proof());
+    fn test_zkemail_prove() {
+        assert!(zkemail_prove());
     }
 }

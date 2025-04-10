@@ -1792,7 +1792,6 @@ dependencies = [
 name = "mopro-zkemail-nr"
 version = "0.1.0"
 dependencies = [
- "hex",
  "mopro-ffi",
  "noir",
  "serde",
