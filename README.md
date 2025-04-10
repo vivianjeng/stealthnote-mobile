@@ -66,3 +66,12 @@ For Android:
 ```sh
 open android -a Android\ Studio
 ```
+
+## 📊 Benchmarks
+
+The following benchmarks were conducted on Apple M3 chips in release mode:
+
+| zkEmail Operation | iOS, Time (ms) | Android, Time (ms) |
+|-----------|---------------|-------------------|
+| Proof Generation | 1309 | 3826 |
+| Verification | 962 | 2857 |
