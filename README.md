@@ -95,6 +95,23 @@ For Android device/simulator:
 npm run android
 ```
 
+### Flutter
+
+- Check flutter environment
+   ```sh
+   flutter doctor 
+   ```
+
+- Install Flutter Dependencies
+   ```sh
+   flutter pub get
+   ```
+
+- Run the app (Please turn on emulators before running the command)
+   ```sh
+   flutter run
+   ```
+
 ## 📊 Benchmarks
 
 The following benchmarks were conducted on Apple M3 chips in release mode:
