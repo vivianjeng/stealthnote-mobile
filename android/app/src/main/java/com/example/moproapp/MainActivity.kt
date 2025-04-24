@@ -1,6 +1,5 @@
 package com.example.moproapp
 
-import MultiplierComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.moproapp.FibonacciComponent
 import com.example.moproapp.ZKEmailComponent
 import java.io.File
 import java.io.IOException
@@ -53,29 +51,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Circom", "Halo2", "Noir")
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        text = { Text(title) },
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index }
-                    )
-                }
-            }
             Spacer(modifier = Modifier.height(16.dp))
-            when (selectedTab) {
-                0 -> MultiplierComponent()
-                1 -> FibonacciComponent()
-                2 -> ZKEmailComponent()
-            }
+            ZKEmailComponent()
         }
     }
 }
