@@ -15,7 +15,7 @@ See how to install mopro CLI: [Getting started](https://zkmopro.org/docs/getting
 > - iOS: [ios/MoproApp/ContentView.swift](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/ios/MoproApp/ContentView.swift#L93)
 > - Android: [android/app/src/main/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/android/app/src/main/assets/srs.local)
 > - React Native: [react-native/app/(tabs)/index.tsx](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/react-native/app/(tabs)/index.tsx#L16)
-
+> - Flutter: [flutter/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/flutter/assets/srs.local)
 
 ## 🔧 Build the Bindings
 
