@@ -51,20 +51,48 @@ cp -r MoproAndroidBindings/uniffi android/app/src/main/java
 cp -r MoproAndroidBindings/jniLibs android/app/src/main
 ```
 
+### React Native
+
+Copy the generated files into your React Native project:
+
+```sh
+cp -r MoproiOSBindings react-native/modules/mopro/ios && \
+cp -r MoproAndroidBindings/uniffi react-native/modules/mopro/android/src/main/java && \
+cp -r MoproAndroidBindings/jniLibs react-native/modules/mopro/android/src/main 
+```
+
 ## 📂 Open the project
 
 Follow the instructions to open the development tools
 
-For iOS:
+### iOS
 
 ```sh
 open ios/MoproApp.xcodeproj
 ```
 
-For Android:
+### Android
 
 ```sh
 open android -a Android\ Studio
+```
+
+### React Native
+
+```sh
+cd react-native && npm install
+```
+
+For iOS device:
+
+```sh
+npm run ios
+```
+
+For Android device/simulator:
+
+```sh
+npm run android
 ```
 
 ## 📊 Benchmarks
