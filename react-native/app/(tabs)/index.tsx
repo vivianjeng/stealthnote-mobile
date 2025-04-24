@@ -43,12 +43,11 @@ export default function HomeScreen() {
             const endTime = new Date();
             setProof(res);
             setTime(endTime.getTime() - startTime.getTime());
+            setVerifyDisabled(false);
         } catch (error) {
             console.error("Failed to prove zkemail:", error);
-            setProof(error);
         }
         setDisabled(false);
-        setVerifyDisabled(false);
     }
     async function verifyProof(): Promise<void> {
         const srsPath = await downloadSrs();
