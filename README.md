@@ -12,10 +12,11 @@ See how to install mopro CLI: [Getting started](https://zkmopro.org/docs/getting
 > [!WARNING]  
 > The bytecode file only needs to be updated once in [`src/lib.rs`](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/src/lib.rs#L53).
 > The srs.local file must be updated separately for each platform:
-> - iOS: [ios/MoproApp/ContentView.swift](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/ios/MoproApp/ContentView.swift#L93)
-> - Android: [android/app/src/main/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/android/app/src/main/assets/srs.local)
-> - React Native: [react-native/app/(tabs)/index.tsx](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/react-native/app/(tabs)/index.tsx#L16)
-> - Flutter: [flutter/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/flutter/assets/srs.local)
+>
+> -   iOS: [ios/MoproApp/ContentView.swift](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/ios/MoproApp/ContentView.swift#L93)
+> -   Android: [android/app/src/main/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/android/app/src/main/assets/srs.local)
+> -   React Native: [react-native/app/(tabs)/index.tsx](<https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/react-native/app/(tabs)/index.tsx#L16>)
+> -   Flutter: [flutter/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/flutter/assets/srs.local)
 
 ## 🔧 Build the Bindings
 
@@ -72,7 +73,7 @@ Copy the generated files into your React Native project:
 ```sh
 cp -r MoproiOSBindings react-native/modules/mopro/ios && \
 cp -r MoproAndroidBindings/uniffi react-native/modules/mopro/android/src/main/java && \
-cp -r MoproAndroidBindings/jniLibs react-native/modules/mopro/android/src/main 
+cp -r MoproAndroidBindings/jniLibs react-native/modules/mopro/android/src/main
 ```
 
 ### Flutter
@@ -121,26 +122,34 @@ npm run android
 
 ### Flutter
 
-- Check flutter environment
-   ```sh
-   flutter doctor 
-   ```
+-   Go to `flutter` directory
 
-- Install Flutter Dependencies
-   ```sh
-   flutter pub get
-   ```
+    ```sh
+    cd flutter
+    ```
 
-- Run the app (Please turn on emulators before running the command)
-   ```sh
-   flutter run
-   ```
+-   Check flutter environment
+
+    ```sh
+    flutter doctor
+    ```
+
+-   Install Flutter Dependencies
+
+    ```sh
+    flutter pub get
+    ```
+
+-   Run the app (Please turn on emulators before running the command)
+    ```sh
+    flutter run
+    ```
 
 ## 📊 Benchmarks
 
 The following benchmarks were conducted on Apple M3 chips in release mode:
 
 | zkEmail Operation | iOS, Time (ms) | Android, Time (ms) |
-|-----------|---------------|-------------------|
-| Proof Generation | 1309 | 3826 |
-| Verification | 962 | 2857 |
+| ----------------- | -------------- | ------------------ |
+| Proof Generation  | 1309           | 3826               |
+| Verification      | 962            | 2857               |
