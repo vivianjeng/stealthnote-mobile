@@ -1,0 +1,54 @@
+use num_bigint::BigInt;
+use serde::{Deserialize, Serialize};
+
+use super::{AnonGroup, AnonGroupProvider, EphemeralKey};
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct GoogleOAuthProvider;
+
+impl AnonGroupProvider for GoogleOAuthProvider {
+    fn name() -> String {
+        "".to_string()
+    }
+
+    /** Slug is a key that represents the type of the AnonGroup identifier (to be used in URLs). Example: "domain" */
+    fn get_slug() -> String {
+        "".to_string()
+    }
+
+    /**
+     * Generate a ZK proof that the current user is a member of an AnonGroup
+     * @param ephemeralPubkeyHash - Hash of the ephemeral pubkey, expiry and salt
+     * @returns Returns the AnonGroup and membership proof, along with additional args that may be needed for verification
+     */
+    fn generate_proof(ephemeral_key: EphemeralKey) -> (Vec<u8>, AnonGroup, Vec<u8>) {
+        unimplemented!()
+    }
+
+    /**
+     * Verify a ZK proof of group membership
+     * @param proof - The ZK proof to verify
+     * @param ephemeralPubkey - Pubkey modulus of the ephemeral key that was used when generating the proof
+     * @param anonGroup - AnonGroup that the proof claims membership in
+     * @param proofArgs - Additional args that was returned when the proof was generated
+     * @returns Promise resolving to true if the proof is valid
+     */
+    fn verify_proof(
+        proof: Vec<u8>,
+        anon_group_id: String,
+        ephemeral_pubkey: BigInt,
+        ephemeral_pubkey_expiry: usize,
+        proof_args: Vec<u8>,
+    ) -> bool {
+        unimplemented!()
+    }
+
+    /**
+     * Get the AnonGroup by its unique identifier
+     * @param groupId - Unique identifier for the AnonGroup
+     * @returns Promise resolving to the AnonGroup
+     */
+    fn get_anon_group(group_id: String) -> AnonGroup {
+        unimplemented!()
+    }
+}

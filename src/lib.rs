@@ -11,8 +11,9 @@ use noir::{
     },
     witness::from_vec_str_to_witness_map,
 };
-
 use std::collections::HashMap;
+
+mod api;
 
 #[uniffi::export]
 pub fn prove() -> bool {
