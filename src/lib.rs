@@ -143,6 +143,27 @@ pub fn prove_jwt(srs_path: String, inputs: HashMap<String, Vec<String>>) -> Vec<
     proof
 }
 
+#[uniffi::export]
+pub fn verify_jwt(srs_path: String, proof: Vec<u8>) -> bool {
+    const JWT_JSON: &str = include_str!("../circuit/stealthnote_jwt.json");
+    let bytecode_json: serde_json::Value = serde_json::from_str(&JWT_JSON).unwrap();
+    let bytecode = bytecode_json["bytecode"].as_str().unwrap();
+
+    // Setup SRS
+    setup_srs_from_bytecode(bytecode, Some(&srs_path), false).unwrap();
+
+    // Get the verification key
+    let vk = get_honk_verification_key(bytecode, false).unwrap();
+
+    // Start timing the proof verification
+    let start = std::time::Instant::now();
+    let verdict = verify_ultra_honk(proof, vk).unwrap();
+
+    println!("Proof verification time: {:?}", start.elapsed());
+    println!("Proof verification verdict: {}", verdict);
+
+    verdict
+}
 
 #[uniffi::export]
 pub fn verify_zkemail(srs_path: String, proof: Vec<u8>) -> bool {
@@ -348,10 +369,10 @@ mod tests {
         // Ensure proof is not empty (basic check)
         assert!(!proof.is_empty(), "Generated proof is empty");
 
-        // // Call verify_jwt
-        // let is_valid = verify_jwt(srs_path, proof);
+        // Call verify_jwt
+        let is_valid = verify_jwt(srs_path, proof);
 
         // Assert that verification returns true
-        // assert!(is_valid, "Proof verification failed");
+        assert!(is_valid, "Proof verification failed");
     }
 }
