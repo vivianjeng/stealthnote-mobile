@@ -62,7 +62,7 @@ impl Api for FileApi {
         }
     }
 
-    fn insert_message(message: SignedMessage) -> Result<bool> {
+    fn insert_message(message: SignedMessage) -> Result<usize> {
         let messages_dir = Path::new("messages");
         fs::create_dir_all(messages_dir)?;
 
@@ -99,7 +99,7 @@ impl Api for FileApi {
             .open(&index_path)?;
         index_file.write_all(serialized_index.as_bytes())?;
 
-        Ok(true)
+        Ok(msg_id)
     }
 
     fn get_message(msg_id: usize) -> Result<SignedMessage> {
@@ -193,7 +193,7 @@ impl Api for FileApi {
         Ok(message.likes)
     }
 
-    fn update_likes(msg_id: usize, increase: bool, pub_key: String) -> Result<bool> {
+    fn update_likes(msg_id: usize, increase: bool, pub_key: String) -> Result<usize> {
         let messages_dir = Path::new("messages");
         let index_path = messages_dir.join("index.json");
         if !index_path.exists() {
@@ -247,7 +247,7 @@ impl Api for FileApi {
             .open(&index_path)?;
         index_file.write_all(serialized_index.as_bytes())?;
 
-        Ok(true)
+        Ok(entry.likes)
     }
 }
 

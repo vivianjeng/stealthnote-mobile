@@ -7,6 +7,7 @@ use provider::*;
 
 pub mod likes;
 pub mod membership;
+pub mod message;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Provider {
