@@ -206,21 +206,39 @@ impl Api for FileApi {
         file.read_to_string(&mut data)?;
         let mut index_map: HashMap<usize, MessageIndexEntry> = serde_json::from_str(&data)?;
 
-        let filepath = {
-            let entry = index_map
-                .get_mut(&msg_id)
-                .ok_or_else(|| format!("Message ID {} not found in index", msg_id))
-                .unwrap();
+        let entry = index_map
+            .get_mut(&msg_id)
+            .ok_or_else(|| format!("Message ID {} not found in index", msg_id))
+            .unwrap();
+        let filepath = messages_dir.join(&entry.filename);
 
-            if increase {
-                entry.likes += 1;
-            } else {
-                entry.likes = entry.likes.saturating_sub(1);
-            }
+        // update the message file
+        let mut msg_file = fs::File::open(&filepath)?;
+        let mut msg_data = String::new();
+        msg_file.read_to_string(&mut msg_data)?;
+        let mut message = serde_json::from_str::<SignedMessage>(&msg_data)?;
+        let is_increase = increase && !message.likes.contains(&pub_key);
+        let is_decrease = !increase && message.likes.contains(&pub_key);
+        if is_increase {
+            message.likes.push(pub_key);
+        } else if is_decrease {
+            message.likes.retain(|x| x.ne(&pub_key));
+        }
 
-            messages_dir.join(&entry.filename)
-        };
+        // save back to the message file
+        let serialized_message = serde_json::to_string_pretty(&message)?;
+        let mut msg_file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(&filepath)?;
+        msg_file.write_all(serialized_message.as_bytes())?;
 
+        // update the number of likes in index.json
+        if is_increase {
+            entry.likes += 1;
+        } else if is_decrease {
+            entry.likes = entry.likes.saturating_sub(1);
+        }
         // save back to index.json
         let serialized_index = serde_json::to_string_pretty(&index_map)?;
         let mut index_file = OpenOptions::new()
@@ -228,24 +246,6 @@ impl Api for FileApi {
             .truncate(true)
             .open(&index_path)?;
         index_file.write_all(serialized_index.as_bytes())?;
-
-        // update the message file
-        let mut msg_file = fs::File::open(&filepath)?;
-        let mut msg_data = String::new();
-        msg_file.read_to_string(&mut msg_data)?;
-        let mut message = serde_json::from_str::<SignedMessage>(&msg_data)?;
-        if increase && !message.likes.contains(&pub_key) {
-            message.likes.push(pub_key);
-        } else {
-            message.likes.retain(|x| x.ne(&pub_key));
-        }
-
-        let serialized_message = serde_json::to_string_pretty(&message)?;
-        let mut msg_file = OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .open(&filepath)?;
-        msg_file.write_all(serialized_message.as_bytes())?;
 
         Ok(true)
     }

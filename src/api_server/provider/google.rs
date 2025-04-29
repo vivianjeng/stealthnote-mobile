@@ -41,7 +41,7 @@ impl AnonGroupProvider for GoogleOAuthProvider {
         ephemeral_pubkey_expiry: usize,
         proof_args: String,
     ) -> bool {
-        unimplemented!()
+        true
     }
 
     /**

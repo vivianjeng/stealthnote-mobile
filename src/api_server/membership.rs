@@ -21,3 +21,39 @@ pub fn create_membership(member: Member) -> Result<bool> {
 
     FileApi::insert_member(member)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::api_server::{provider::GoogleOAuthProvider, Provider};
+
+    fn cleanup() {
+        let _ = std::fs::remove_file("members.json");
+    }
+
+    fn sample_member() -> Member {
+        Member {
+            provider: Provider::Google(GoogleOAuthProvider),
+            pubkey: BigUint::from(12345u64).to_string(),
+            pubkey_expiry: 9999999,
+            proof: "dummy-proof".to_string(),
+            proof_args: "dummy-args".to_string(),
+            group_id: 1,
+        }
+    }
+
+    #[test]
+    fn test_create_membership_success() {
+        cleanup();
+
+        let member = sample_member();
+        let result = create_membership(member.clone());
+
+        assert!(result.is_ok());
+
+        let loaded = FileApi::get_member(BigUint::from(12345u64)).unwrap();
+        assert_eq!(loaded.group_id, member.group_id);
+
+        cleanup();
+    }
+}
