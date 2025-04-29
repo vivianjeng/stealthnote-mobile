@@ -13,7 +13,7 @@ use noir::{
 };
 use std::collections::HashMap;
 
-mod api;
+mod api_server;
 
 #[uniffi::export]
 pub fn prove() -> bool {
