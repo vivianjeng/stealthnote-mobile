@@ -114,11 +114,11 @@ pub fn prove_jwt(srs_path: String, inputs: HashMap<String, Vec<String>>) -> Vec<
         "jwt_pubkey_modulus_limbs",
         "jwt_pubkey_redc_params_limbs",
         "jwt_signature_limbs",
+        "domain_storage",
+        "domain_len",
         "ephemeral_pubkey",
         "ephemeral_pubkey_salt",
         "ephemeral_pubkey_expiry",
-        "domain_storage",
-        "domain_len",
     ];
 
     let mut witness_vec_string: Vec<String> = Vec::new();
