@@ -18,40 +18,40 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
   }
 
   @override
-  Future<ProveZkEmailResult> proveZkEmail(String srsPath, Map<String, List<String>> inputs) async {
+  Future<ProveJwtResult> proveJwt(String srsPath, Map<String, List<String>> inputs) async {
     try {
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
-        'proveZkEmail',
+        'proveJwt',
         {
           'srsPath': srsPath,
           'inputs': inputs,
         },
       );
       if (result == null) {
-        return ProveZkEmailResult(error: 'Native method returned null');
+        return ProveJwtResult(error: 'Native method returned null');
       }
-      return ProveZkEmailResult.fromMap(result);
+      return ProveJwtResult.fromMap(result);
     } on PlatformException catch (e) {
-      return ProveZkEmailResult(error: "Failed to prove zkEmail: '${e.message}'.");
+      return ProveJwtResult(error: "Failed to prove jwt: '${e.message}'.");
     }
   }
 
   @override
-  Future<VerifyZkEmailResult> verifyZkEmail(String srsPath, Uint8List proof) async {
+  Future<VerifyJwtResult> verifyJwt(String srsPath, Uint8List proof) async {
     try {
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
-        'verifyZkEmail',
+        'verifyJwt',
         {
           'srsPath': srsPath,
           'proof': proof,
         },
       );
       if (result == null) {
-        return VerifyZkEmailResult(isValid: false, error: 'Native method returned null');
+        return VerifyJwtResult(isValid: false, error: 'Native method returned null');
       }
-      return VerifyZkEmailResult.fromMap(result);
+      return VerifyJwtResult.fromMap(result);
     } on PlatformException catch (e) {
-      return VerifyZkEmailResult(isValid: false, error: "Failed to verify zkEmail: '${e.message}'.");
+      return VerifyJwtResult(isValid: false, error: "Failed to verify jwt: '${e.message}'.");
     }
   }
 }

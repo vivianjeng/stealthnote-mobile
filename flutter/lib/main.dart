@@ -20,11 +20,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _moproFlutterPlugin = MoproFlutter();
 
-  // State variables for zkEmail operations
-  String? _zkEmailInputPath;
+  // State variables for Jwt operations
+  String? _jwtInputPath;
   String? _srsPath;
-  ProveZkEmailResult? _proofResult;
-  VerifyZkEmailResult? _verificationResult;
+  ProveJwtResult? _proofResult;
+  VerifyJwtResult? _verificationResult;
   String _status = 'Idle';
   String? _errorMessage;
   int? _provingTimeMillis;
@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Copy assets needed for zkEmail operations
+    // Copy assets needed for Jwt operations
     _copyAssets();
   }
 
@@ -48,15 +48,15 @@ class _MyAppState extends State<MyApp> {
     });
     try {
       // Define asset paths relative to the 'assets' folder in pubspec.yaml
-      const inputAssetPath = 'assets/zkemail_input.json';
-      const srsAssetPath = 'assets/srs.local';
+      const inputAssetPath = 'assets/jwt_input.json';
+      const srsAssetPath = 'assets/jwt-srs.local';
 
       // Copy assets to the file system and store their paths
       final inputPath = await _moproFlutterPlugin.copyAssetToFileSystem(inputAssetPath);
       final srsPath = await _moproFlutterPlugin.copyAssetToFileSystem(srsAssetPath);
 
       setState(() {
-        _zkEmailInputPath = inputPath;
+        _jwtInputPath = inputPath;
         _srsPath = srsPath;
         _status = 'Assets copied successfully. Ready.';
         _isBusy = false;
@@ -71,9 +71,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  // Function to call proveZkEmail
-  Future<void> _callProveZkEmail() async {
-    if (_zkEmailInputPath == null || _srsPath == null) {
+  // Function to call proveJwt
+  Future<void> _callProveJwt() async {
+    if (_jwtInputPath == null || _srsPath == null) {
        setState(() {
         _status = 'Assets not ready';
         _errorMessage = 'Please wait for assets to be copied or check for errors.';
@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
 
     try {
       // Parse the input JSON
-      final inputs = await _moproFlutterPlugin.parseZkEmailInputs(_zkEmailInputPath!);
+      final inputs = await _moproFlutterPlugin.parseJwtInputs(_jwtInputPath!);
 
       setState(() {
         _status = 'Generating proof...';
@@ -99,7 +99,7 @@ class _MyAppState extends State<MyApp> {
 
       // Generate the proof
       final stopwatch = Stopwatch()..start();
-      final result = await _moproFlutterPlugin.proveZkEmail(_srsPath!, inputs);
+      final result = await _moproFlutterPlugin.proveJwt(_srsPath!, inputs);
       stopwatch.stop();
 
       setState(() {
@@ -118,8 +118,8 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  // Function to call verifyZkEmail
-  Future<void> _callVerifyZkEmail() async {
+  // Function to call verifyJwt
+  Future<void> _callVerifyJwt() async {
     if (_proofResult?.proof == null || _srsPath == null) {
       setState(() {
         _status = 'Proof not available or SRS path missing';
@@ -138,7 +138,7 @@ class _MyAppState extends State<MyApp> {
     try {
       // Verify the proof
       final stopwatch = Stopwatch()..start();
-      final result = await _moproFlutterPlugin.verifyZkEmail(_srsPath!, _proofResult!.proof!);
+      final result = await _moproFlutterPlugin.verifyJwt(_srsPath!, _proofResult!.proof!);
       stopwatch.stop();
 
       setState(() {
@@ -183,7 +183,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('zkEmail Flutter Example'),
+          title: const Text('Jwt Flutter Example'),
           elevation: 0, // Cleaner look
         ),
         body: Padding(
@@ -238,16 +238,16 @@ class _MyAppState extends State<MyApp> {
                      children: [
                       ElevatedButton(
                         // Disable button if busy or assets not ready
-                        onPressed: (_isBusy || _zkEmailInputPath == null || _srsPath == null) ? null : _callProveZkEmail,
-                        child: const Text('Generate zkEmail Proof'),
+                        onPressed: (_isBusy || _jwtInputPath == null || _srsPath == null) ? null : _callProveJwt,
+                        child: const Text('Generate Jwt Proof'),
                       ),
                       // Only show Verify button if proof exists
                       if (_proofResult != null) ...[
                         const SizedBox(height: 12),
                         ElevatedButton(
                           // Disable if busy or proof is null (redundant check, but safe)
-                          onPressed: (_isBusy || _proofResult?.proof == null) ? null : _callVerifyZkEmail,
-                          child: const Text('Verify zkEmail Proof'),
+                          onPressed: (_isBusy || _proofResult?.proof == null) ? null : _callVerifyJwt,
+                          child: const Text('Verify Jwt Proof'),
                         ),
                       ]
                      ],

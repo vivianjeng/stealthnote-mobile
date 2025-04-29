@@ -11,8 +11,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-import uniffi.mopro.proveZkemail
-import uniffi.mopro.verifyZkemail
+import uniffi.mopro.proveJwt
+import uniffi.mopro.verifyJwt
 
 /** MoproFlutterPlugin */
 class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
@@ -39,7 +39,7 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
               "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
               }
-              "proveZkEmail" -> {
+              "proveJwt" -> {
                 val srsPath = call.argument<String>("srsPath")
                 @Suppress("UNCHECKED_CAST")
                 val inputs = call.argument<Map<String, List<String>>>("inputs")
@@ -51,12 +51,12 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                   return@launch
                 }
     
-                val proofBytes = proveZkemail(srsPath!!, inputs!!)
+                val proofBytes = proveJwt(srsPath!!, inputs!!)
                 launch(Dispatchers.Main) {
                   result.success(mapOf("proof" to proofBytes, "error" to null))
                 }
               }
-              "verifyZkEmail" -> {
+              "verifyJwt" -> {
                 val srsPath = call.argument<String>("srsPath")
                 val proof = call.argument<ByteArray>("proof")
     
@@ -67,7 +67,7 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                   return@launch
                 }
     
-                val isValid = verifyZkemail(srsPath!!, proof!!)
+                val isValid = verifyJwt(srsPath!!, proof!!)
                 launch(Dispatchers.Main) {
                   result.success(mapOf("isValid" to isValid, "error" to null))
                 }
@@ -81,8 +81,8 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
           } catch (e: Exception) {
             launch(Dispatchers.Main) {
               when (call.method) {
-                "proveZkEmail" -> result.success(mapOf("proof" to null, "error" to e.message))
-                "verifyZkEmail" -> result.success(mapOf("isValid" to false, "error" to e.message))
+                "proveJwt" -> result.success(mapOf("proof" to null, "error" to e.message))
+                "verifyJwt" -> result.success(mapOf("isValid" to false, "error" to e.message))
                 else -> result.error("NATIVE_ERROR", e.message, e.stackTraceToString())
               }
             }

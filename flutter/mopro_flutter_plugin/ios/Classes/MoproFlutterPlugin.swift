@@ -36,7 +36,7 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
              } catch {
                  dispatchError("DIR_ERROR", "Could not get documents directory", error.localizedDescription)
              }
-        case "proveZkEmail":
+        case "proveJwt":
             guard let args = call.arguments as? [String: Any],
                   let srsPath = args["srsPath"] as? String,
                   let inputs = args["inputs"] as? [String: [String]] else {
@@ -46,7 +46,7 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
             do {
                 // Note: The mopro.swift binding `proveZkemail` doesn't throw currently,
                 // but we include a do-catch for future-proofing and consistency.
-                let proofBytes = proveZkemail(srsPath: srsPath, inputs: inputs)
+                let proofBytes = proveJwt(srsPath: srsPath, inputs: inputs)
                 // Wrap the result in the format expected by Dart
                 let resultMap: [String: Any?] = ["proof": FlutterStandardTypedData(bytes: proofBytes), "error": nil]
                 dispatchResult(resultMap)
@@ -55,7 +55,7 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
                  let resultMap: [String: Any?] = ["proof": nil, "error": error.localizedDescription]
                  dispatchResult(resultMap)
             }
-        case "verifyZkEmail":
+        case "verifyJwt":
              guard let args = call.arguments as? [String: Any],
                   let srsPath = args["srsPath"] as? String,
                   let proofData = args["proof"] as? FlutterStandardTypedData else {
@@ -64,7 +64,7 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
             }
             do {
                  // Note: The mopro.swift binding `verifyZkemail` doesn't throw currently.
-                let isValid = verifyZkemail(srsPath: srsPath, proof: proofData.data)
+                let isValid = verifyJwt(srsPath: srsPath, proof: proofData.data)
                  // Wrap the result in the format expected by Dart
                 let resultMap: [String: Any?] = ["isValid": isValid, "error": nil]
                 dispatchResult(resultMap)

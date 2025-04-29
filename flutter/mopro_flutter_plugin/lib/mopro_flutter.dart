@@ -33,11 +33,11 @@ class MoproFlutter {
     return file.path; // Return the file path
   }
 
-  /// Parses a zkEmail input JSON file from the file system.
+  /// Parses a Jwt input JSON file from the file system.
   ///
   /// Reads the JSON file specified by [filePath], parses it,
-  /// and returns a Map structured for the `proveZkEmail` method.
-  Future<Map<String, List<String>>> parseZkEmailInputs(String filePath) async {
+  /// and returns a Map structured for the `proveJwt` method.
+  Future<Map<String, List<String>>> parseJwtInputs(String filePath) async {
     try {
       // Read the file from the provided file system path
       final file = File(filePath);
@@ -52,78 +52,89 @@ class MoproFlutter {
       }
 
       // Extract data based on the structure observed in native examples
-      if (jsonObject.containsKey('header')) {
-        final header = jsonObject['header'] as Map<String, dynamic>;
-        if (header.containsKey('storage') && header['storage'] is List) {
-          inputs['header_storage'] = jsonArrayToStringList(header['storage'] as List);
+      if (jsonObject.containsKey('partial_data')) {
+        final partialData = jsonObject['partial_data'] as Map<String, dynamic>;
+        if (partialData.containsKey('storage') && partialData['storage'] is List) {
+          inputs['partial_data_storage'] = jsonArrayToStringList(partialData['storage'] as List);
         }
-        if (header.containsKey('len')) {
-          inputs['header_len'] = [header['len'].toString()];
-        }
-      }
-
-      if (jsonObject.containsKey('pubkey')) {
-        final pubkey = jsonObject['pubkey'] as Map<String, dynamic>;
-        if (pubkey.containsKey('modulus') && pubkey['modulus'] is List) {
-          inputs['pubkey_modulus'] = jsonArrayToStringList(pubkey['modulus'] as List);
-        }
-        if (pubkey.containsKey('redc') && pubkey['redc'] is List) {
-          inputs['pubkey_redc'] = jsonArrayToStringList(pubkey['redc'] as List);
+        if (partialData.containsKey('len')) {
+          inputs['partial_data_len'] = [partialData['len'].toString()];
         }
       }
 
-      if (jsonObject.containsKey('signature') && jsonObject['signature'] is List) {
-        inputs['signature'] = jsonArrayToStringList(jsonObject['signature'] as List);
+      if (jsonObject.containsKey('partial_hash') && jsonObject['partial_hash'] is List) {
+        inputs['partial_hash'] = jsonArrayToStringList(jsonObject['partial_hash'] as List);
       }
 
-      if (jsonObject.containsKey('date_index')) {
-        inputs['date_index'] = [jsonObject['date_index'].toString()];
+      if (jsonObject.containsKey('full_data_length')) {
+        inputs['full_data_length'] = [jsonObject['full_data_length'].toString()];
       }
 
-      void extractSequence(String key, String mapKey) {
-          if (jsonObject.containsKey(key)) {
-              final sequence = jsonObject[key] as Map<String, dynamic>;
-              if (sequence.containsKey('index')) {
-                  inputs['${mapKey}_index'] = [sequence['index'].toString()];
-              }
-              if (sequence.containsKey('length')) {
-                  inputs['${mapKey}_length'] = [sequence['length'].toString()];
-              }
-          }
+      if (jsonObject.containsKey('base64_decode_offset')) {
+        inputs['base64_decode_offset'] = [jsonObject['base64_decode_offset'].toString()];
       }
 
-      extractSequence('subject_sequence', 'subject');
-      extractSequence('from_header_sequence', 'from_header');
-      extractSequence('from_address_sequence', 'from_address');
+      if (jsonObject.containsKey('jwt_pubkey_modulus_limbs') && jsonObject['jwt_pubkey_modulus_limbs'] is List) {
+        inputs['jwt_pubkey_modulus_limbs'] = jsonArrayToStringList(jsonObject['jwt_pubkey_modulus_limbs'] as List);
+      }
 
+      if (jsonObject.containsKey('jwt_pubkey_redc_params_limbs') && jsonObject['jwt_pubkey_redc_params_limbs'] is List) {
+        inputs['jwt_pubkey_redc_params_limbs'] = jsonArrayToStringList(jsonObject['jwt_pubkey_redc_params_limbs'] as List);
+      }
+
+      if (jsonObject.containsKey('jwt_signature_limbs') && jsonObject['jwt_signature_limbs'] is List) {
+        inputs['jwt_signature_limbs'] = jsonArrayToStringList(jsonObject['jwt_signature_limbs'] as List);
+      }
+
+       if (jsonObject.containsKey('domain')) {
+        final domainData = jsonObject['domain'] as Map<String, dynamic>;
+        if (domainData.containsKey('storage') && domainData['storage'] is List) {
+          inputs['domain_storage'] = jsonArrayToStringList(domainData['storage'] as List);
+        }
+        if (domainData.containsKey('len')) {
+          inputs['domain_len'] = [domainData['len'].toString()];
+        }
+      }
+
+      if (jsonObject.containsKey('ephemeral_pubkey')) {
+        inputs['ephemeral_pubkey'] = [jsonObject['ephemeral_pubkey'].toString()];
+      }
+
+      if (jsonObject.containsKey('ephemeral_pubkey_salt')) {
+        inputs['ephemeral_pubkey_salt'] = [jsonObject['ephemeral_pubkey_salt'].toString()];
+      }
+
+      if (jsonObject.containsKey('ephemeral_pubkey_expiry')) {
+        inputs['ephemeral_pubkey_expiry'] = [jsonObject['ephemeral_pubkey_expiry'].toString()];
+      }
       return inputs;
     } catch (e) {
-      print("Error parsing zkEmail inputs: $e");
+      print("Error parsing jwt inputs: $e");
       rethrow; // Re-throw the exception so the caller can handle it
     }
   }
 
 
-  /// Generates a zkEmail proof using the platform channel.
+  /// Generates a Jwt proof using the platform channel.
   ///
   /// Takes the path to the SRS file (must be accessible by native code,
   /// use [copyAssetToFileSystem] if needed) and the parsed inputs map
-  /// (use [parseZkEmailInputs] to generate from JSON).
-  Future<ProveZkEmailResult?> proveZkEmail(
+  /// (use [parseJwtInputs] to generate from JSON).
+  Future<ProveJwtResult?> proveJwt(
     String srsPath,
     Map<String, List<String>> inputs
     ) {
-      return MoproFlutterPlatform.instance.proveZkEmail(srsPath, inputs);
+      return MoproFlutterPlatform.instance.proveJwt(srsPath, inputs);
   }
 
-  /// Verifies a zkEmail proof using the platform channel.
+  /// Verifies a Jwt proof using the platform channel.
   ///
   /// Takes the path to the SRS file (must be accessible by native code,
   /// use [copyAssetToFileSystem] if needed) and the proof bytes.
-  Future<VerifyZkEmailResult?> verifyZkEmail(
+  Future<VerifyJwtResult?> verifyJwt(
     String srsPath,
     Uint8List proof
   ) {
-    return MoproFlutterPlatform.instance.verifyZkEmail(srsPath, proof);
+    return MoproFlutterPlatform.instance.verifyJwt(srsPath, proof);
   }
 }

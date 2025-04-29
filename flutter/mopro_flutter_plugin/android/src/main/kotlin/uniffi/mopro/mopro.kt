@@ -770,11 +770,15 @@ internal interface IntegrityCheckingUniffiLib : Library {
 
     fun uniffi_mopro_bindings_checksum_func_prove(): Short
 
+    fun uniffi_mopro_bindings_checksum_func_prove_jwt(): Short
+
     fun uniffi_mopro_bindings_checksum_func_prove_zkemail(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_circom_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_halo2_proof(): Short
+
+    fun uniffi_mopro_bindings_checksum_func_verify_jwt(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_zkemail(): Short
 
@@ -836,6 +840,12 @@ internal interface UniffiLib : Library {
 
     fun uniffi_mopro_bindings_fn_func_prove(uniffi_out_err: UniffiRustCallStatus): Byte
 
+    fun uniffi_mopro_bindings_fn_func_prove_jwt(
+        `srsPath`: RustBuffer.ByValue,
+        `inputs`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): RustBuffer.ByValue
+
     fun uniffi_mopro_bindings_fn_func_prove_zkemail(
         `srsPath`: RustBuffer.ByValue,
         `inputs`: RustBuffer.ByValue,
@@ -854,6 +864,12 @@ internal interface UniffiLib : Library {
         `vkPath`: RustBuffer.ByValue,
         `proof`: RustBuffer.ByValue,
         `publicInput`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): Byte
+
+    fun uniffi_mopro_bindings_fn_func_verify_jwt(
+        `srsPath`: RustBuffer.ByValue,
+        `proof`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): Byte
 
@@ -1101,6 +1117,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mopro_bindings_checksum_func_prove() != 46869.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mopro_bindings_checksum_func_prove_jwt() != 64842.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mopro_bindings_checksum_func_prove_zkemail() != 12783.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1108,6 +1127,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_halo2_proof() != 24562.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mopro_bindings_checksum_func_verify_jwt() != 40530.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_zkemail() != 8016.toShort()) {
@@ -1661,6 +1683,20 @@ fun `prove`(): kotlin.Boolean =
         },
     )
 
+fun `proveJwt`(
+    `srsPath`: kotlin.String,
+    `inputs`: Map<kotlin.String, List<kotlin.String>>,
+): kotlin.ByteArray =
+    FfiConverterByteArray.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_prove_jwt(
+                FfiConverterString.lower(`srsPath`),
+                FfiConverterMapStringSequenceString.lower(`inputs`),
+                _status,
+            )
+        },
+    )
+
 fun `proveZkemail`(
     `srsPath`: kotlin.String,
     `inputs`: Map<kotlin.String, List<kotlin.String>>,
@@ -1706,6 +1742,20 @@ fun `verifyHalo2Proof`(
                 FfiConverterString.lower(`vkPath`),
                 FfiConverterByteArray.lower(`proof`),
                 FfiConverterByteArray.lower(`publicInput`),
+                _status,
+            )
+        },
+    )
+
+fun `verifyJwt`(
+    `srsPath`: kotlin.String,
+    `proof`: kotlin.ByteArray,
+): kotlin.Boolean =
+    FfiConverterBoolean.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_verify_jwt(
+                FfiConverterString.lower(`srsPath`),
+                FfiConverterByteArray.lower(`proof`),
                 _status,
             )
         },
