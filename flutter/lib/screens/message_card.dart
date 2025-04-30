@@ -159,7 +159,11 @@ class _MessageCardState extends State<MessageCard> {
           children: [
             Row(
               children: [
-                CircleAvatar(child: Icon(Icons.account_circle)),
+                Image.network(
+                  "https://img.logo.dev/${widget.msg.org}?token=pk_SqdEexoxR3akcyJz7PneXg",
+                  width: 24,
+                  height: 24,
+                ),
                 const SizedBox(width: 8),
                 Expanded(child: Text('Someone from ${widget.msg.org}')),
                 Text(timeago.format(widget.msg.time)),
