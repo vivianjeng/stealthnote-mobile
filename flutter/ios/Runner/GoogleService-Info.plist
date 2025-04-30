@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.194338782167-745t4ocob6cprhno894c59l3a9lgifgm</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDNowr4RKTLKAQNlElJIwb-DxAL1mHgXmE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>194338782167</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.moproFlutterExample</string>
+	<key>PROJECT_ID</key>
+	<string>stealthnote-mobile</string>
+	<key>STORAGE_BUCKET</key>
+	<string>stealthnote-mobile.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:194338782167:ios:396dd29061c709e207a992</string>
+</dict>
+</plist>

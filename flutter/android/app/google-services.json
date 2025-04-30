@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "194338782167",
+    "project_id": "stealthnote-mobile",
+    "storage_bucket": "stealthnote-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194338782167:android:b604f2d9ea16272807a992",
+        "android_client_info": {
+          "package_name": "com.example.mopro_flutter_example"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHKORjAv-9ppLZ0dK_tYpQ7nonentkRd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.moproFlutterExample"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
