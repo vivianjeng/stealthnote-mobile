@@ -37,6 +37,7 @@ class StealthHomePage extends StatefulWidget {
 
 class _StealthHomePageState extends State<StealthHomePage> {
   List<Message> messages = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -61,6 +62,12 @@ class _StealthHomePageState extends State<StealthHomePage> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -70,13 +77,20 @@ class _StealthHomePageState extends State<StealthHomePage> {
         elevation: 0,
         leading: Icon(Icons.menu),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          SignInCard(),
-          const SizedBox(height: 16),
-          ...messages.map((msg) => MessageCard(msg)).toList(),
-        ],
+      body: GestureDetector(
+        onTap: () {
+          // Dismiss keyboard when tapping outside text field
+          FocusScope.of(context).unfocus();
+        },
+        child: ListView(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            SignInCard(),
+            const SizedBox(height: 16),
+            ...messages.map((msg) => MessageCard(msg)).toList(),
+          ],
+        ),
       ),
     );
   }
