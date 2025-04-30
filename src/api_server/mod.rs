@@ -9,52 +9,54 @@ pub mod likes;
 pub mod membership;
 pub mod message;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(uniffi::Enum, Serialize, Deserialize, Clone)]
 pub enum Provider {
-    Google(GoogleOAuthProvider),
+    Google,
+    Microsoft,
 }
 
 impl Provider {
     pub fn verify_proof(
         &self,
         proof: String,
-        anon_group_id: usize,
+        anon_group_id: u32,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: usize,
+        ephemeral_pubkey_expiry: u32,
         proof_args: String,
     ) -> bool {
         match self {
-            Provider::Google(google_provider) => google_provider.verify_proof(
+            Self::Google => GoogleOAuthProvider::verify_proof(
                 proof,
                 anon_group_id,
                 ephemeral_pubkey,
                 ephemeral_pubkey_expiry,
                 proof_args,
             ),
+            Self::Microsoft => panic!("Not supported yet."),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
 pub struct Member {
     pub provider: Provider,
     pub pubkey: String, // BigUint
-    pub pubkey_expiry: usize,
+    pub pubkey_expiry: u32,
     pub proof: String,
     pub proof_args: String,
-    pub group_id: usize,
+    pub group_id: u32,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
 pub struct SignedMessage {
-    id: usize,
-    anon_group_id: usize,
+    id: u32,
+    anon_group_id: u32,
     anon_group_provider: Provider,
     text: String,
-    timestamp: usize,
+    timestamp: u32,
     internal: bool,
     signature: String,        // BigUint
     ephemeral_pubkey: String, // BigUint
-    ephemeral_pubkey_expiry: usize,
+    ephemeral_pubkey_expiry: u32,
     likes: Vec<String>, // list of pub_key
 }

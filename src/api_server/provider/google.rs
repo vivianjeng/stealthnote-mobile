@@ -1,6 +1,8 @@
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
+use crate::proof::jwt_proof;
+
 use super::{AnonGroup, AnonGroupProvider, EphemeralKey};
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -21,8 +23,9 @@ impl AnonGroupProvider for GoogleOAuthProvider {
      * @param ephemeralPubkeyHash - Hash of the ephemeral pubkey, expiry and salt
      * @returns Returns the AnonGroup and membership proof, along with additional args that may be needed for verification
      */
-    fn generate_proof(&self, ephemeral_key: EphemeralKey) -> (String, AnonGroup, String) {
-        unimplemented!()
+    fn generate_proof(ephemeral_key: EphemeralKey) -> (String, AnonGroup, String) {
+        const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
+        jwt_proof::prove_jwt(srs_path, inputs)
     }
 
     /**
@@ -34,14 +37,14 @@ impl AnonGroupProvider for GoogleOAuthProvider {
      * @returns Promise resolving to true if the proof is valid
      */
     fn verify_proof(
-        &self,
         proof: String,
-        anon_group_id: usize,
+        anon_group_id: u32,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: usize,
+        ephemeral_pubkey_expiry: u32,
         proof_args: String,
     ) -> bool {
-        true
+        const JWT_SRS: &str = include_str!("../../../public/srs.json");
+        jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
     }
 
     /**

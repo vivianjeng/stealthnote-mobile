@@ -10,11 +10,11 @@ pub trait Api {
     fn get_member(pubkey: BigUint) -> Result<Member>;
 
     // message
-    fn insert_message(message: SignedMessage) -> Result<usize>;
-    fn get_message(msg_id: usize) -> Result<SignedMessage>;
-    fn get_latest_message(number: usize) -> Result<Vec<SignedMessage>>;
+    fn insert_message(message: SignedMessage) -> Result<u32>;
+    fn get_message(msg_id: u32) -> Result<SignedMessage>;
+    fn get_latest_message(number: u32) -> Result<Vec<SignedMessage>>;
 
     // likes
-    fn get_likes(msg_id: usize) -> Result<Vec<String>>;
-    fn update_likes(msg_id: usize, increase: bool, pub_key: String) -> Result<usize>;
+    fn get_likes(msg_id: u32) -> Result<Vec<String>>;
+    fn update_likes(msg_id: u32, increase: bool, pub_key: String) -> Result<u32>;
 }
