@@ -19,8 +19,13 @@ uniffi = { version = "=0.29.0" }
 thiserror = "2.0.12"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+num-bigint = "0.4"
+
+
 # build for Android
 noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg", "android-compat"] }
+anyhow = "1.0.98"
+chrono = "0.4.40"
 # build for iOS
 # noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg"] }
 
