@@ -190,7 +190,7 @@ impl FileApi {
             Err(_) => bail!("convert message object error"),
         };
 
-        Ok(message.likes)
+        Ok(message.message.likes)
     }
 
     pub fn update_likes(msg_id: u32, increase: bool, pub_key: String, path: String) -> Result<u32> {
@@ -221,12 +221,12 @@ impl FileApi {
         let mut msg_data = String::new();
         msg_file.read_to_string(&mut msg_data)?;
         let mut message = serde_json::from_str::<SignedMessage>(&msg_data)?;
-        let is_increase = increase && !message.likes.contains(&pub_key);
-        let is_decrease = !increase && message.likes.contains(&pub_key);
+        let is_increase = increase && !message.message.likes.contains(&pub_key);
+        let is_decrease = !increase && message.message.likes.contains(&pub_key);
         if is_increase {
-            message.likes.push(pub_key);
+            message.message.likes.push(pub_key);
         } else if is_decrease {
-            message.likes.retain(|x| x.ne(&pub_key));
+            message.message.likes.retain(|x| x.ne(&pub_key));
         }
 
         // save back to the message file
@@ -264,7 +264,7 @@ impl FileApi {
 
 #[cfg(test)]
 mod tests {
-    use crate::api_server::{provider::google::GoogleOAuthProvider, Provider};
+    use crate::api_server::{Message, Provider};
 
     use super::*;
     use std::fs;
@@ -287,16 +287,18 @@ mod tests {
 
     fn sample_message() -> SignedMessage {
         SignedMessage {
-            id: 1,
-            anon_group_id: 10,
-            anon_group_provider: Provider::Google,
-            text: "this is a test string".to_string(),
-            timestamp: Utc::now().timestamp() as u32,
-            internal: false,
+            message: Message {
+                id: 1,
+                anon_group_id: 10,
+                anon_group_provider: Provider::Google,
+                text: "this is a test string".to_string(),
+                timestamp: Utc::now().timestamp() as u32,
+                internal: false,
+                likes: vec![],
+            },
             signature: "fake signature".to_string(),
             ephemeral_pubkey: "ephemeral pubkey".to_string(),
             ephemeral_pubkey_expiry: Utc::now().timestamp() as u32 + 999999999,
-            likes: vec![],
         }
     }
 
@@ -317,12 +319,12 @@ mod tests {
             1
         );
         let got_message = FileApi::get_message(1, "./".to_string()).unwrap();
-        assert_eq!(got_message.text, message.text);
+        assert_eq!(got_message.message.text, message.message.text);
 
         // Test get_latest_message
         let latest_messages = FileApi::get_latest_message(1, "./".to_string()).unwrap();
         assert_eq!(latest_messages.len(), 1);
-        assert_eq!(latest_messages[0].text, message.text);
+        assert_eq!(latest_messages[0].message.text, message.message.text);
 
         // Test get_likes and update_likes
         assert_eq!(FileApi::get_likes(1, "./".to_string()).unwrap().len(), 0);

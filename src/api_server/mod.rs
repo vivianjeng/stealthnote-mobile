@@ -1,3 +1,4 @@
+use ed25519::Signature;
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
@@ -37,21 +38,21 @@ impl Provider {
     }
 }
 
-#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Clone)]
 pub struct Member {
     pub provider: Provider,
-    pub pubkey: String, // BigUint
+    pub pubkey: String,
     pub pubkey_expiry: u32,
     pub proof: String,
     pub proof_args: String,
     pub group_id: u32,
 }
 
-#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
+// #[derive(Serialize, Deserialize, Clone)]
 pub struct SignedMessage {
     pub message: Message,
-    pub signature: String,        // BigUint
-    pub ephemeral_pubkey: String, // BigUint
+    pub signature: BigUint,
+    pub ephemeral_pubkey: BigUint,
     pub ephemeral_pubkey_expiry: u32,
 }
 

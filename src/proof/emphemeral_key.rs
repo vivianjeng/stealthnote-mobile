@@ -52,23 +52,26 @@ impl EphemeralKey {
         }
     }
 
-    pub fn sign_message(&mut self, message: Message) -> (BigUint, u32, BigUint) {
+    pub fn sign_message(&mut self, message: Message) -> (BigUint, u32, Signature) {
         let message_hash = Self::hash_message(message);
         let signature = self.private_key.sign(message_hash.as_ref());
 
         (
             BigUint::from_bytes_be(self.public_key.as_bytes()),
             self.expiry,
-            BigUint::from_bytes_be(signature.to_bytes().as_ref()),
+            signature,
         )
     }
 
     pub fn verify_message_signature(&self, signed_message: SignedMessage) -> bool {
         let message_hash = Self::hash_message(signed_message.message);
+
         self.public_key
             .verify(
                 message_hash.as_ref(),
-                &Signature::from_bytes(signed_message.signature.as_bytes().try_into().unwrap()),
+                &Signature::from_bytes(
+                    Self::to_fixed_array_64(&signed_message.signature.to_bytes_be()).unwrap(),
+                ),
             )
             .unwrap();
         true
@@ -80,5 +83,55 @@ impl EphemeralKey {
             message.anon_group_id, message.text, message.timestamp
         );
         sha256::digest(msg.as_bytes()).as_bytes().to_vec()
+    }
+
+    fn to_fixed_array_64(input: &Vec<u8>) -> Result<&[u8; 64], String> {
+        if input.len() != 64 {
+            return Err(format!("Invalid length: expected 64, got {}", input.len()));
+        }
+
+        input
+            .as_slice()
+            .try_into()
+            .map_err(|_| "Failed to convert to &[u8; 64]".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::api_server::{Message, Provider, SignedMessage};
+
+    #[test]
+    fn test_ephemeral_key_generation() {
+        let key = EphemeralKey::generate_ephemeral_key();
+        assert_eq!(key.public_key.as_bytes().len(), 32);
+        assert!(key.expiry > 0);
+    }
+
+    #[test]
+    fn test_sign_and_verify_message() {
+        let mut key = EphemeralKey::generate_ephemeral_key();
+
+        let message = Message {
+            id: 1,
+            anon_group_id: 10,
+            anon_group_provider: Provider::Google,
+            text: "this is a test string".to_string(),
+            timestamp: 123456u32,
+            internal: false,
+            likes: vec![],
+        };
+
+        let (pubkey, expiry, signature) = key.sign_message(message.clone());
+
+        let signed = SignedMessage {
+            message,
+            signature: BigUint::from_bytes_be(signature.to_bytes().as_ref()),
+            ephemeral_pubkey: pubkey,
+            ephemeral_pubkey_expiry: expiry,
+        };
+
+        assert!(key.verify_message_signature(signed));
     }
 }

@@ -2,7 +2,7 @@
 // write some functions and bind them to FFI type
 mopro_ffi::app!();
 
-use api_server::{Member, SignedMessage};
+use api_server::{Member, Message, SignedMessage};
 use noir::{
     barretenberg::{
         prove::prove_ultra_honk,
@@ -137,16 +137,6 @@ pub fn verify_zkemail(srs_path: String, proof: Vec<u8>) -> bool {
 #[uniffi::export]
 pub fn create_membership(member: Member, path: String) -> bool {
     api_server::membership::create_membership(member, path).unwrap()
-}
-
-#[uniffi::export]
-pub fn post_message(message: SignedMessage, path: String) -> u32 {
-    api_server::message::post_message(message, path).unwrap()
-}
-#[uniffi::export]
-
-pub fn fetch_message(path: String) -> Vec<SignedMessage> {
-    api_server::message::fetch_message(path)
 }
 
 #[uniffi::export]
