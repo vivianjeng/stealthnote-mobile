@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 import uniffi.mopro.proveJwt
 import uniffi.mopro.verifyJwt
+import uniffi.mopro.verifyJwtProof
 
 /** MoproFlutterPlugin */
 class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
@@ -68,6 +69,19 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                 }
     
                 val isValid = verifyJwt(srsPath!!, proof!!)
+                launch(Dispatchers.Main) {
+                  result.success(mapOf("isValid" to isValid, "error" to null))
+                }
+              }
+              "verifyJwtProof" -> {
+                val srsPath = call.argument<String>("srsPath")
+                val proof = call.argument<ByteArray>("proof")
+                val domain = call.argument<String>("domain")
+                val googleJwtPubkeyModulus = call.argument<String>("googleJwtPubkeyModulus")
+                val ephemeralPubkey = call.argument<String>("ephemeralPubkey")
+                val ephemeralPubkeyExpiry = call.argument<String>("ephemeralPubkeyExpiry")
+
+                val isValid = verifyJwtProof(srsPath!!, proof!!, domain!!, googleJwtPubkeyModulus!!, ephemeralPubkey!!, ephemeralPubkeyExpiry!!)
                 launch(Dispatchers.Main) {
                   result.success(mapOf("isValid" to isValid, "error" to null))
                 }

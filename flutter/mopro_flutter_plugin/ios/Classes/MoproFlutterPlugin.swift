@@ -73,6 +73,25 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
                 let resultMap: [String: Any?] = ["isValid": false, "error": error.localizedDescription]
                  dispatchResult(resultMap)
             }
+        case "verifyJwtProof":
+            guard let args = call.arguments as? [String: Any],
+                  let srsPath = args["srsPath"] as? String,
+                  let proofData = args["proof"] as? FlutterStandardTypedData,
+                  let domain = args["domain"] as? String,
+                  let googleJwtPubkeyModulus = args["googleJwtPubkeyModulus"] as? String,
+                  let ephemeralPubkey = args["ephemeralPubkey"] as? String,
+                  let ephemeralPubkeyExpiry = args["ephemeralPubkeyExpiry"] as? String else {
+                dispatchError("INVALID_ARGUMENTS", "srsPath or proof is null or invalid format", nil)
+                return
+            }
+            do {
+                let isValid = verifyJwtProof(srsPath: srsPath, proof: proofData.data, domain: domain, googleJwtPubkeyModulus: googleJwtPubkeyModulus, ephemeralPubkey: ephemeralPubkey, ephemeralPubkeyExpiry: ephemeralPubkeyExpiry)
+                let resultMap: [String: Any?] = ["isValid": isValid, "error": nil]
+                dispatchResult(resultMap)
+            } catch {
+                let resultMap: [String: Any?] = ["isValid": false, "error": error.localizedDescription]
+                dispatchResult(resultMap)
+            }
         default:
             dispatchResult(FlutterMethodNotImplemented)
         }

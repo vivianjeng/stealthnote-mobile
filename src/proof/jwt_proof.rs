@@ -165,18 +165,9 @@ async fn fetch_google_public_key(key_id: &str) -> Result<Option<GooglePublicKey>
     Ok(key)
 }
 
-#[derive(Debug, Deserialize)]
-struct JWK {
-    kty: String,
-    alg: String,
-    use_: String,
-    n: String, // modulus
-    e: String, // exponent (unused here)
-}
-
-fn pubkey_modulus_from_jwk(jwk: &GooglePublicKey) -> Result<BigUint, Box<dyn std::error::Error>> {
+fn pubkey_modulus_from_jwk(jwk_n: &String) -> Result<BigUint, Box<dyn std::error::Error>> {
     // Decode base64url `n` (modulus)
-    let modulus_bytes = BASE64_URL_SAFE_NO_PAD.decode(&jwk.n)?;
+    let modulus_bytes = BASE64_URL_SAFE_NO_PAD.decode(&jwk_n)?;
     let modulus = BigUint::from_bytes_be(&modulus_bytes);
     Ok(modulus)
 }
@@ -230,7 +221,6 @@ fn flatten_fields_as_array(fields: &[String]) -> Vec<u8> {
     flatten_u8_arrays(parsed_fields)
 }
 
-
 fn num_to_uint32_be(n: u32, buffer_size: usize) -> Vec<u8> {
     let mut buf = vec![0u8; buffer_size];
     // Write the u32 in big-endian starting at the end of the buffer
@@ -250,55 +240,12 @@ fn reconstruct_honk_proof(public_inputs: &[u8], proof: &[u8], field_byte_size: u
     result
 }
 
-async fn fetch_message(id: &str, is_internal: bool) -> Result<MessageResponse, anyhow::Error> {
-    let client = Client::new();
-    let url = format!("http://localhost:3000/api/messages/{}", id);
-
-    let mut req = client.get(&url).header("Content-Type", "application/json");
-
-    if is_internal {
-        let pubkey =
-            get_ephemeral_pubkey().ok_or_else(|| anyhow::anyhow!("No public key found"))?;
-        req = req.header("Authorization", format!("Bearer {}", pubkey));
-    }
-
-    let response = req.send().await?;
-
-    if !response.status().is_success() {
-        let err_text = response.text().await?;
-        return Err(anyhow::anyhow!(
-            "Call to /messages/{} API failed: {}",
-            id,
-            err_text
-        ));
-    }
-
-    let message = response.json::<MessageResponse>().await?;
-    let google_public_key = fetch_google_public_key(&message.proofArgs.keyId)
-        .await
-        .unwrap()
-        .unwrap();
-
-    let google_JWT_pubkey_modulus = pubkey_modulus_from_jwk(&google_public_key).unwrap();
-    // return await JWTCircuitHelper.verifyProof(proof, {
-    //     domain: anonGroupId,
-    //     jwtPubKey: googleJWTPubkeyModulus,
-    //     ephemeralPubkey: ephemeralPubkey,
-    //     ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
-    //   });
-    let domain = message.anonGroupId.clone();
-    println!("domain: {:?}", domain);
-    let jwt_pubkey = google_JWT_pubkey_modulus;
-    println!("google_JWT_pubkey_modulus: {:?}", jwt_pubkey);
-    let ephemeral_pubkey = BigUint::from_str(&message.ephemeralPubkey).unwrap();
-    println!("ephemeral_pubkey: {:?}", ephemeral_pubkey);
-    let ephemeral_pubkey_expiry = message.ephemeralPubkeyExpiry.clone();
-    println!("ephemeral_pubkey_expiry: {:?}", ephemeral_pubkey_expiry);
-    let parsed_ephemeral_pubkey_expiry: DateTime<Utc> = ephemeral_pubkey_expiry
-        .parse::<DateTime<Utc>>()
-        .expect("Invalid datetime format");
-    println!("parsed_ephemeral_pubkey_expiry: {:?}", parsed_ephemeral_pubkey_expiry);
-
+fn prepare_public_inputs(
+    jwt_pubkey: BigUint,
+    domain: String,
+    ephemeral_pubkey: BigUint,
+    parsed_ephemeral_pubkey_expiry: DateTime<Utc>,
+) -> Vec<String> {
     let mut public_inputs = Vec::new();
 
     // === 1. Modulus limbs (18 limbs of 120 bits each) ===
@@ -334,40 +281,110 @@ async fn fetch_message(id: &str, is_internal: bool) -> Result<MessageResponse, a
     let formatted = format!("0x{:0>64x}", epoch_seconds);
     public_inputs.push(formatted);
 
-
-    let proof =
-        reconstruct_honk_proof(&flatten_fields_as_array(&public_inputs), &message.proof, 32);
-
-    let verified = verify_jwt("public/jwt-srs.local".to_string(), proof);
-    println!("verified: {}", verified);
-
-    Ok(message)
+    public_inputs
 }
 
-#[tokio::main]
-pub async fn verify_jwt_from_database() -> Result<bool, reqwest::Error> {
-    let url = "http://localhost:3000/api/messages?limit=5";
-    let response = reqwest::get(url).await?;
-    let body = response.text().await?;
-    let messages: Vec<Message> = serde_json::from_str(&body).unwrap();
-    for message in &messages {
-        let mut inputs = HashMap::new();
-        inputs.insert("id".to_string(), vec![message.id.clone()]);
-    }
-    let message = fetch_message(&messages[0].id, true).await.unwrap();
-    println!("ephemeralPubkeyExpiry: {:?}", message.ephemeralPubkeyExpiry);
-    // println!("message: {:?}", message);
+#[uniffi::export]
+fn verify_jwt_proof(
+    srs_path: String,
+    proof: Vec<u8>,
+    domain: String,
+    google_jwt_pubkey_modulus: String,
+    ephemeral_pubkey: String,
+    ephemeral_pubkey_expiry: String,
+) -> bool {
+    let jwt_pubkey = pubkey_modulus_from_jwk(&google_jwt_pubkey_modulus).unwrap();
+    let ephemeral_pubkey_biguint = BigUint::from_str(&ephemeral_pubkey).unwrap();
+    let parsed_ephemeral_pubkey_expiry: DateTime<Utc> = ephemeral_pubkey_expiry
+        .parse::<DateTime<Utc>>()
+        .expect("Invalid datetime format");
 
-    Ok(true)
+    let public_inputs = prepare_public_inputs(
+        jwt_pubkey,
+        domain,
+        ephemeral_pubkey_biguint,
+        parsed_ephemeral_pubkey_expiry,
+    );
+
+    let proof = reconstruct_honk_proof(&flatten_fields_as_array(&public_inputs), &proof, 32);
+
+    let verified = verify_jwt(srs_path, proof);
+    verified
 }
+
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_verify_jwt_from_database() {
-        let result = verify_jwt_from_database().unwrap();
-        assert!(result);
+    #[tokio::test]
+    async fn test_verify_jwt_from_database() -> Result<(), anyhow::Error> {
+        let url = "http://localhost:3000/api/messages?limit=5";
+        let response = reqwest::get(url).await.unwrap();
+        let body = response.text().await.unwrap();
+        let messages: Vec<Message> = serde_json::from_str(&body).unwrap();
+        for message in &messages {
+            let mut inputs = HashMap::new();
+            inputs.insert("id".to_string(), vec![message.id.clone()]);
+        }
+        let id = messages[0].id.clone();
+        let is_internal = true;
+
+        let client = Client::new();
+        let url = format!("http://localhost:3000/api/messages/{}", id);
+
+        let mut req = client.get(&url).header("Content-Type", "application/json");
+
+        if is_internal {
+            let pubkey =
+                get_ephemeral_pubkey().ok_or_else(|| anyhow::anyhow!("No public key found"))?;
+            req = req.header("Authorization", format!("Bearer {}", pubkey));
+        }
+
+        let response = req.send().await?;
+
+        if !response.status().is_success() {
+            let err_text = response.text().await?;
+            return Err(anyhow::anyhow!(
+                "Call to /messages/{} API failed: {}",
+                id,
+                err_text
+            ));
+        }
+
+        let message = response.json::<MessageResponse>().await?;
+
+        let google_public_key = fetch_google_public_key(&message.proofArgs.keyId)
+            .await
+            .unwrap()
+            .unwrap();
+
+        let domain = message.anonGroupId.clone();
+
+        let google_jwt_pubkey_modulus = google_public_key.n.clone();
+
+        let ephemeral_pubkey = message.ephemeralPubkey.clone();
+        let ephemeral_pubkey_expiry = message.ephemeralPubkeyExpiry.clone();
+        let proof = message.proof.clone();
+
+        // return await JWTCircuitHelper.verifyProof(proof, {
+        //     domain: anonGroupId,
+        //     jwtPubKey: googleJWTPubkeyModulus,
+        //     ephemeralPubkey: ephemeralPubkey,
+        //     ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+        //   });
+
+        let srs_path = "public/jwt-srs.local".to_string();
+        let verified = verify_jwt_proof(
+            srs_path,
+            proof,
+            domain,
+            google_jwt_pubkey_modulus,
+            ephemeral_pubkey,
+            ephemeral_pubkey_expiry,
+        );
+        println!("verified: {}", verified);
+        Ok(())
+        // assert!(result);
     }
 }
