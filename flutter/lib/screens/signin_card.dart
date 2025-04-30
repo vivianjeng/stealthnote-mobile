@@ -28,7 +28,6 @@ class _SignInCardState extends State<SignInCard> {
       // Use the AuthService to handle Google Sign-In
       final UserCredential? userCredential =
           await _authService.signInWithGoogle();
-      print('userCredential: $userCredential');
 
       if (userCredential != null && userCredential.user != null) {
         // Navigate to BottomNavBar instead of directly to HomePage

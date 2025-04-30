@@ -70,8 +70,8 @@ class AuthService {
       final payload = parseJwtPayload(idToken);
 
       final googlePublicKey = await fetchGooglePublicKey(header['kid']);
-      print('idToken: $idToken');
-      print('Google Public Key: $googlePublicKey');
+      // print('idToken: $idToken');
+      // print('Google Public Key: $googlePublicKey');
 
       // Sign in to Firebase with the Google credential
       return await _auth.signInWithCredential(credential);

@@ -9,9 +9,7 @@ Future<dynamic> fetchMessages() async {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print('Messages: $data');
       return data;
-      // Handle the JSON data (e.g. parse to a model)
     } else {
       print('Error: ${response.statusCode}');
     }
