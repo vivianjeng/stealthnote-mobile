@@ -137,4 +137,19 @@ class MoproFlutter {
   ) {
     return MoproFlutterPlatform.instance.verifyJwt(srsPath, proof);
   }
+
+  /// Verifies a Jwt proof using the platform channel.
+  ///
+  /// Takes the path to the SRS file (must be accessible by native code,
+  /// 
+  Future<VerifyJwtProofResult?> verifyJwtProof(
+    String srsPath,
+    Uint8List proof,
+    String domain,
+    String googleJwtPubkeyModulus,
+    String ephemeralPubkey,
+    String ephemeralPubkeyExpiry
+  ) {
+    return MoproFlutterPlatform.instance.verifyJwtProof(srsPath, proof, domain, googleJwtPubkeyModulus, ephemeralPubkey, ephemeralPubkeyExpiry);
+  }
 }

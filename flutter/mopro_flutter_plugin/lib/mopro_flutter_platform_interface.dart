@@ -36,6 +36,21 @@ class VerifyJwtResult {
   }
 }
 
+class VerifyJwtProofResult {
+  final bool isValid;
+  final String? error;
+
+  VerifyJwtProofResult({required this.isValid, this.error});
+
+  factory VerifyJwtProofResult.fromMap(Map<dynamic, dynamic> map) {
+    return VerifyJwtProofResult(
+      isValid: map['isValid'] ?? false,
+      error: map['error'],
+    );
+  }
+  
+}
+
 abstract class MoproFlutterPlatform extends PlatformInterface {
   /// Constructs a MoproFlutterPlatform.
   MoproFlutterPlatform() : super(token: _token);
@@ -79,5 +94,9 @@ abstract class MoproFlutterPlatform extends PlatformInterface {
   /// Takes the path to the SRS file and the proof bytes.
   Future<VerifyJwtResult> verifyJwt(String srsPath, Uint8List proof) {
     throw UnimplementedError('verifyJwt() has not been implemented.');
+  }
+
+  Future<VerifyJwtProofResult> verifyJwtProof(String srsPath, Uint8List proof, String domain, String googleJwtPubkeyModulus, String ephemeralPubkey, String ephemeralPubkeyExpiry) {
+    throw UnimplementedError('verifyJwtProof() has not been implemented.');
   }
 }

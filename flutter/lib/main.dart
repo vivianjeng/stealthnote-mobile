@@ -45,10 +45,12 @@ class _StealthHomePageState extends State<StealthHomePage> {
       List<Message> processedMessages = [];
       for (var message in messages) {
         final msg = Message(
+          id: message['id'],
           org: message['anonGroupId'],
           time: DateTime.parse(message['timestamp']),
           body: message['text'],
           likes: message['likes'],
+          internal: message['internal'],
         );
         processedMessages.add(msg);
       }

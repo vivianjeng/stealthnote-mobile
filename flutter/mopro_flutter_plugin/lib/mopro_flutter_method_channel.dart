@@ -13,19 +13,21 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
   @override
-  Future<ProveJwtResult> proveJwt(String srsPath, Map<String, List<String>> inputs) async {
+  Future<ProveJwtResult> proveJwt(
+    String srsPath,
+    Map<String, List<String>> inputs,
+  ) async {
     try {
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
         'proveJwt',
-        {
-          'srsPath': srsPath,
-          'inputs': inputs,
-        },
+        {'srsPath': srsPath, 'inputs': inputs},
       );
       if (result == null) {
         return ProveJwtResult(error: 'Native method returned null');
@@ -41,17 +43,54 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
     try {
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
         'verifyJwt',
-        {
-          'srsPath': srsPath,
-          'proof': proof,
-        },
+        {'srsPath': srsPath, 'proof': proof},
       );
       if (result == null) {
-        return VerifyJwtResult(isValid: false, error: 'Native method returned null');
+        return VerifyJwtResult(
+          isValid: false,
+          error: 'Native method returned null',
+        );
       }
       return VerifyJwtResult.fromMap(result);
     } on PlatformException catch (e) {
-      return VerifyJwtResult(isValid: false, error: "Failed to verify jwt: '${e.message}'.");
+      return VerifyJwtResult(
+        isValid: false,
+        error: "Failed to verify jwt: '${e.message}'.",
+      );
+    }
+  }
+
+  @override
+  Future<VerifyJwtProofResult> verifyJwtProof(
+    String srsPath,
+    Uint8List proof,
+    String domain,
+    String googleJwtPubkeyModulus,
+    String ephemeralPubkey,
+    String ephemeralPubkeyExpiry,
+  ) async {
+    try {
+      final Map<dynamic, dynamic>? result = await methodChannel
+          .invokeMethod('verifyJwtProof', {
+            'srsPath': srsPath,
+            'proof': proof,
+            'domain': domain,
+            'googleJwtPubkeyModulus': googleJwtPubkeyModulus,
+            'ephemeralPubkey': ephemeralPubkey,
+            'ephemeralPubkeyExpiry': ephemeralPubkeyExpiry,
+          });
+      if (result == null) {
+        return VerifyJwtProofResult(
+          isValid: false,
+          error: 'Native method returned null',
+        );
+      }
+      return VerifyJwtProofResult.fromMap(result);
+    } on PlatformException catch (e) {
+      return VerifyJwtProofResult(
+        isValid: false,
+        error: "Failed to verify jwt proof: '${e.message}'.",
+      );
     }
   }
 }

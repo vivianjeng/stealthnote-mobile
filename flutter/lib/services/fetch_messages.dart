@@ -17,3 +17,33 @@ Future<dynamic> fetchMessages() async {
     print('Failed to fetch messages: $e');
   }
 }
+
+Future<dynamic> fetchMessage(String id, bool isInternal) async {
+  final headers = <String, String>{'Content-Type': 'application/json'};
+
+  if (isInternal) {
+    final pubkey = getEphemeralPubkey();
+    if (pubkey == null) {
+      throw Exception('No public key found');
+    }
+    headers['Authorization'] = 'Bearer $pubkey';
+  }
+
+  final response = await http.get(
+    Uri.parse('https://stealthnote.xyz/api/messages/$id'),
+    headers: headers,
+  );
+
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception('Call to /messages/$id API failed: ${response.body}');
+  }
+
+  final message = jsonDecode(response.body);
+  return message;
+}
+
+// Dummy method placeholder
+String? getEphemeralPubkey() {
+  // Replace with your actual logic
+  return 'example_pubkey';
+}
