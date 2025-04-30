@@ -1,5 +1,36 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+
+import 'fetch_googleJWTpubKey.dart';
+
+Map<String, dynamic> parseJwtHeader(String? idToken) {
+  if (idToken == null) {
+    throw FormatException('Invalid ID token');
+  }
+  final parts = idToken.split('.');
+  if (parts.length != 3) {
+    throw FormatException('Invalid ID token');
+  }
+
+  final headerBase64 = base64Url.normalize(parts[0]);
+  final headerString = utf8.decode(base64Url.decode(headerBase64));
+  return json.decode(headerString);
+}
+
+Map<String, dynamic> parseJwtPayload(String? idToken) {
+  if (idToken == null) {
+    throw FormatException('Invalid ID token');
+  }
+  final parts = idToken.split('.');
+  if (parts.length != 3) {
+    throw FormatException('Invalid ID token');
+  }
+
+  final payloadBase64 = base64Url.normalize(parts[1]);
+  final payloadString = utf8.decode(base64Url.decode(payloadBase64));
+  return json.decode(payloadString);
+}
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -33,6 +64,14 @@ class AuthService {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+
+      final idToken = googleAuth.idToken;
+      final header = parseJwtHeader(idToken);
+      final payload = parseJwtPayload(idToken);
+
+      final googlePublicKey = await fetchGooglePublicKey(header['kid']);
+      // print('idToken: $idToken');
+      // print('Google Public Key: $googlePublicKey');
 
       // Sign in to Firebase with the Google credential
       return await _auth.signInWithCredential(credential);

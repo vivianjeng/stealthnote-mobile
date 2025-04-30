@@ -5,8 +5,9 @@ class Message {
   final String org;
   final DateTime time;
   final String body;
+  final int likes;
 
-  Message({required this.org, required this.time, required this.body});
+  Message({required this.org, required this.time, required this.body, required this.likes});
 }
 
 class MessageCard extends StatelessWidget {
@@ -37,7 +38,7 @@ class MessageCard extends StatelessWidget {
               children: [
                 Icon(Icons.thumb_up_alt_outlined, size: 16),
                 const SizedBox(width: 4),
-                Text('0'),
+                Text(msg.likes.toString()),
                 const Spacer(),
                 TextButton(onPressed: () {}, child: Text('Verify'))
               ],

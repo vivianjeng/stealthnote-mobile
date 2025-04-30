@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/signin_card.dart';
 import 'screens/message_card.dart';
+import 'services/fetch_messages.dart';
 import 'services/jwt_prover.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
@@ -11,11 +12,9 @@ import 'services/auth_service.dart';
 void main() async {
   // Initialize Flutter binding
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase - make sure you've added the necessary configuration files
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(StealthNoteApp());
 }
@@ -36,23 +35,28 @@ class StealthHomePage extends StatefulWidget {
   _StealthHomePageState createState() => _StealthHomePageState();
 }
 
-
 class _StealthHomePageState extends State<StealthHomePage> {
+  List<Message> messages = [];
 
-  final List<Message> messages = [
-    Message(
-      org: 'coinspect.com',
-      time: DateTime.now().subtract(Duration(days: 1)),
-      body:
-          'Fantastic work on StealthNote! One gap: the Trust assumptions / Potential attacks...',
-    ),
-    Message(
-      org: 'ethereum.org',
-      time: DateTime.now().subtract(Duration(days: 4)),
-      body:
-          '@chainbound.io person – probably related to the stated "open problem"...',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final messages = fetchMessages().then((messages) {
+      List<Message> processedMessages = [];
+      for (var message in messages) {
+        final msg = Message(
+          org: message['anonGroupId'],
+          time: DateTime.parse(message['timestamp']),
+          body: message['text'],
+          likes: message['likes'],
+        );
+        processedMessages.add(msg);
+      }
+      setState(() {
+        this.messages = processedMessages;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
