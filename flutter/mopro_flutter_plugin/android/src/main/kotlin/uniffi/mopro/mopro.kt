@@ -782,6 +782,8 @@ internal interface IntegrityCheckingUniffiLib : Library {
 
     fun uniffi_mopro_bindings_checksum_func_prove_zkemail(): Short
 
+    fun uniffi_mopro_bindings_checksum_func_sign_message(): Short
+
     fun uniffi_mopro_bindings_checksum_func_verify_circom_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_halo2_proof(): Short
@@ -884,6 +886,16 @@ internal interface UniffiLib : Library {
     fun uniffi_mopro_bindings_fn_func_prove_zkemail(
         `srsPath`: RustBuffer.ByValue,
         `inputs`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): RustBuffer.ByValue
+
+    fun uniffi_mopro_bindings_fn_func_sign_message(
+        `anonGroupId`: RustBuffer.ByValue,
+        `text`: RustBuffer.ByValue,
+        `internal`: Byte,
+        `ephemeralPublicKey`: RustBuffer.ByValue,
+        `ephemeralPrivateKey`: RustBuffer.ByValue,
+        `ephemeralPubkeyExpiry`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): RustBuffer.ByValue
 
@@ -1180,6 +1192,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mopro_bindings_checksum_func_prove_zkemail() != 12783.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mopro_bindings_checksum_func_sign_message() != 37307.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_circom_proof() != 14151.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1448,6 +1463,50 @@ public object FfiConverterTypeCircomProofResult : FfiConverterRustBuffer<CircomP
     }
 }
 
+data class EphemeralKey(
+    var `ephemeralPubkeyHash`: kotlin.String,
+    var `ephemeralPubkeyExpiry`: kotlin.String,
+    var `privateKey`: kotlin.String,
+    var `publicKey`: kotlin.String,
+    var `salt`: kotlin.String,
+) {
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeEphemeralKey : FfiConverterRustBuffer<EphemeralKey> {
+    override fun read(buf: ByteBuffer): EphemeralKey =
+        EphemeralKey(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+
+    override fun allocationSize(value: EphemeralKey) =
+        (
+            FfiConverterString.allocationSize(value.`ephemeralPubkeyHash`) +
+                FfiConverterString.allocationSize(value.`ephemeralPubkeyExpiry`) +
+                FfiConverterString.allocationSize(value.`privateKey`) +
+                FfiConverterString.allocationSize(value.`publicKey`) +
+                FfiConverterString.allocationSize(value.`salt`)
+        )
+
+    override fun write(
+        value: EphemeralKey,
+        buf: ByteBuffer,
+    ) {
+        FfiConverterString.write(value.`ephemeralPubkeyHash`, buf)
+        FfiConverterString.write(value.`ephemeralPubkeyExpiry`, buf)
+        FfiConverterString.write(value.`privateKey`, buf)
+        FfiConverterString.write(value.`publicKey`, buf)
+        FfiConverterString.write(value.`salt`, buf)
+    }
+}
+
 data class G1(
     var `x`: kotlin.String,
     var `y`: kotlin.String,
@@ -1555,10 +1614,10 @@ public object FfiConverterTypeHalo2ProofResult : FfiConverterRustBuffer<Halo2Pro
 data class Member(
     var `provider`: Provider,
     var `pubkey`: kotlin.String,
-    var `pubkeyExpiry`: kotlin.UInt,
-    var `proof`: kotlin.String,
-    var `proofArgs`: kotlin.String,
-    var `groupId`: kotlin.UInt,
+    var `pubkeyExpiry`: kotlin.String,
+    var `proof`: kotlin.ByteArray,
+    var `proofArgs`: Map<kotlin.String, List<kotlin.String>>,
+    var `groupId`: kotlin.String,
 ) {
     companion object
 }
@@ -1571,20 +1630,20 @@ public object FfiConverterTypeMember : FfiConverterRustBuffer<Member> {
         Member(
             FfiConverterTypeProvider.read(buf),
             FfiConverterString.read(buf),
-            FfiConverterUInt.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterMapStringSequenceString.read(buf),
             FfiConverterString.read(buf),
-            FfiConverterUInt.read(buf),
         )
 
     override fun allocationSize(value: Member) =
         (
             FfiConverterTypeProvider.allocationSize(value.`provider`) +
                 FfiConverterString.allocationSize(value.`pubkey`) +
-                FfiConverterUInt.allocationSize(value.`pubkeyExpiry`) +
-                FfiConverterString.allocationSize(value.`proof`) +
-                FfiConverterString.allocationSize(value.`proofArgs`) +
-                FfiConverterUInt.allocationSize(value.`groupId`)
+                FfiConverterString.allocationSize(value.`pubkeyExpiry`) +
+                FfiConverterByteArray.allocationSize(value.`proof`) +
+                FfiConverterMapStringSequenceString.allocationSize(value.`proofArgs`) +
+                FfiConverterString.allocationSize(value.`groupId`)
         )
 
     override fun write(
@@ -1593,24 +1652,76 @@ public object FfiConverterTypeMember : FfiConverterRustBuffer<Member> {
     ) {
         FfiConverterTypeProvider.write(value.`provider`, buf)
         FfiConverterString.write(value.`pubkey`, buf)
-        FfiConverterUInt.write(value.`pubkeyExpiry`, buf)
-        FfiConverterString.write(value.`proof`, buf)
-        FfiConverterString.write(value.`proofArgs`, buf)
-        FfiConverterUInt.write(value.`groupId`, buf)
+        FfiConverterString.write(value.`pubkeyExpiry`, buf)
+        FfiConverterByteArray.write(value.`proof`, buf)
+        FfiConverterMapStringSequenceString.write(value.`proofArgs`, buf)
+        FfiConverterString.write(value.`groupId`, buf)
+    }
+}
+
+data class Message(
+    var `id`: kotlin.String,
+    var `anonGroupId`: kotlin.String,
+    var `anonGroupProvider`: kotlin.String,
+    var `text`: kotlin.String,
+    var `timestamp`: kotlin.String,
+    var `internal`: kotlin.Boolean,
+    var `likes`: kotlin.UInt,
+) {
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMessage : FfiConverterRustBuffer<Message> {
+    override fun read(buf: ByteBuffer): Message =
+        Message(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+
+    override fun allocationSize(value: Message) =
+        (
+            FfiConverterString.allocationSize(value.`id`) +
+                FfiConverterString.allocationSize(value.`anonGroupId`) +
+                FfiConverterString.allocationSize(value.`anonGroupProvider`) +
+                FfiConverterString.allocationSize(value.`text`) +
+                FfiConverterString.allocationSize(value.`timestamp`) +
+                FfiConverterBoolean.allocationSize(value.`internal`) +
+                FfiConverterUInt.allocationSize(value.`likes`)
+        )
+
+    override fun write(
+        value: Message,
+        buf: ByteBuffer,
+    ) {
+        FfiConverterString.write(value.`id`, buf)
+        FfiConverterString.write(value.`anonGroupId`, buf)
+        FfiConverterString.write(value.`anonGroupProvider`, buf)
+        FfiConverterString.write(value.`text`, buf)
+        FfiConverterString.write(value.`timestamp`, buf)
+        FfiConverterBoolean.write(value.`internal`, buf)
+        FfiConverterUInt.write(value.`likes`, buf)
     }
 }
 
 data class SignedMessage(
-    var `id`: kotlin.UInt,
-    var `anonGroupId`: kotlin.UInt,
-    var `anonGroupProvider`: Provider,
+    var `id`: kotlin.String,
+    var `anonGroupId`: kotlin.String,
+    var `anonGroupProvider`: kotlin.String,
     var `text`: kotlin.String,
-    var `timestamp`: kotlin.UInt,
+    var `timestamp`: kotlin.String,
     var `internal`: kotlin.Boolean,
     var `signature`: kotlin.String,
     var `ephemeralPubkey`: kotlin.String,
-    var `ephemeralPubkeyExpiry`: kotlin.UInt,
-    var `likes`: List<kotlin.String>,
+    var `ephemeralPubkeyExpiry`: kotlin.String,
+    var `likes`: kotlin.UInt,
 ) {
     companion object
 }
@@ -1621,46 +1732,46 @@ data class SignedMessage(
 public object FfiConverterTypeSignedMessage : FfiConverterRustBuffer<SignedMessage> {
     override fun read(buf: ByteBuffer): SignedMessage =
         SignedMessage(
-            FfiConverterUInt.read(buf),
-            FfiConverterUInt.read(buf),
-            FfiConverterTypeProvider.read(buf),
             FfiConverterString.read(buf),
-            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterBoolean.read(buf),
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterUInt.read(buf),
-            FfiConverterSequenceString.read(buf),
         )
 
     override fun allocationSize(value: SignedMessage) =
         (
-            FfiConverterUInt.allocationSize(value.`id`) +
-                FfiConverterUInt.allocationSize(value.`anonGroupId`) +
-                FfiConverterTypeProvider.allocationSize(value.`anonGroupProvider`) +
+            FfiConverterString.allocationSize(value.`id`) +
+                FfiConverterString.allocationSize(value.`anonGroupId`) +
+                FfiConverterString.allocationSize(value.`anonGroupProvider`) +
                 FfiConverterString.allocationSize(value.`text`) +
-                FfiConverterUInt.allocationSize(value.`timestamp`) +
+                FfiConverterString.allocationSize(value.`timestamp`) +
                 FfiConverterBoolean.allocationSize(value.`internal`) +
                 FfiConverterString.allocationSize(value.`signature`) +
                 FfiConverterString.allocationSize(value.`ephemeralPubkey`) +
-                FfiConverterUInt.allocationSize(value.`ephemeralPubkeyExpiry`) +
-                FfiConverterSequenceString.allocationSize(value.`likes`)
+                FfiConverterString.allocationSize(value.`ephemeralPubkeyExpiry`) +
+                FfiConverterUInt.allocationSize(value.`likes`)
         )
 
     override fun write(
         value: SignedMessage,
         buf: ByteBuffer,
     ) {
-        FfiConverterUInt.write(value.`id`, buf)
-        FfiConverterUInt.write(value.`anonGroupId`, buf)
-        FfiConverterTypeProvider.write(value.`anonGroupProvider`, buf)
+        FfiConverterString.write(value.`id`, buf)
+        FfiConverterString.write(value.`anonGroupId`, buf)
+        FfiConverterString.write(value.`anonGroupProvider`, buf)
         FfiConverterString.write(value.`text`, buf)
-        FfiConverterUInt.write(value.`timestamp`, buf)
+        FfiConverterString.write(value.`timestamp`, buf)
         FfiConverterBoolean.write(value.`internal`, buf)
         FfiConverterString.write(value.`signature`, buf)
         FfiConverterString.write(value.`ephemeralPubkey`, buf)
-        FfiConverterUInt.write(value.`ephemeralPubkeyExpiry`, buf)
-        FfiConverterSequenceString.write(value.`likes`, buf)
+        FfiConverterString.write(value.`ephemeralPubkeyExpiry`, buf)
+        FfiConverterUInt.write(value.`likes`, buf)
     }
 }
 
@@ -2011,6 +2122,28 @@ fun `proveZkemail`(
             UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_prove_zkemail(
                 FfiConverterString.lower(`srsPath`),
                 FfiConverterMapStringSequenceString.lower(`inputs`),
+                _status,
+            )
+        },
+    )
+
+fun `signMessage`(
+    `anonGroupId`: kotlin.String,
+    `text`: kotlin.String,
+    `internal`: kotlin.Boolean,
+    `ephemeralPublicKey`: kotlin.String,
+    `ephemeralPrivateKey`: kotlin.String,
+    `ephemeralPubkeyExpiry`: kotlin.String,
+): kotlin.String =
+    FfiConverterString.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_sign_message(
+                FfiConverterString.lower(`anonGroupId`),
+                FfiConverterString.lower(`text`),
+                FfiConverterBoolean.lower(`internal`),
+                FfiConverterString.lower(`ephemeralPublicKey`),
+                FfiConverterString.lower(`ephemeralPrivateKey`),
+                FfiConverterString.lower(`ephemeralPubkeyExpiry`),
                 _status,
             )
         },

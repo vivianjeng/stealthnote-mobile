@@ -54,42 +54,64 @@ class MoproFlutter {
       // Extract data based on the structure observed in native examples
       if (jsonObject.containsKey('partial_data')) {
         final partialData = jsonObject['partial_data'] as Map<String, dynamic>;
-        if (partialData.containsKey('storage') && partialData['storage'] is List) {
-          inputs['partial_data_storage'] = jsonArrayToStringList(partialData['storage'] as List);
+        if (partialData.containsKey('storage') &&
+            partialData['storage'] is List) {
+          inputs['partial_data_storage'] = jsonArrayToStringList(
+            partialData['storage'] as List,
+          );
         }
         if (partialData.containsKey('len')) {
           inputs['partial_data_len'] = [partialData['len'].toString()];
         }
       }
 
-      if (jsonObject.containsKey('partial_hash') && jsonObject['partial_hash'] is List) {
-        inputs['partial_hash'] = jsonArrayToStringList(jsonObject['partial_hash'] as List);
+      if (jsonObject.containsKey('partial_hash') &&
+          jsonObject['partial_hash'] is List) {
+        inputs['partial_hash'] = jsonArrayToStringList(
+          jsonObject['partial_hash'] as List,
+        );
       }
 
       if (jsonObject.containsKey('full_data_length')) {
-        inputs['full_data_length'] = [jsonObject['full_data_length'].toString()];
+        inputs['full_data_length'] = [
+          jsonObject['full_data_length'].toString(),
+        ];
       }
 
       if (jsonObject.containsKey('base64_decode_offset')) {
-        inputs['base64_decode_offset'] = [jsonObject['base64_decode_offset'].toString()];
+        inputs['base64_decode_offset'] = [
+          jsonObject['base64_decode_offset'].toString(),
+        ];
       }
 
-      if (jsonObject.containsKey('jwt_pubkey_modulus_limbs') && jsonObject['jwt_pubkey_modulus_limbs'] is List) {
-        inputs['jwt_pubkey_modulus_limbs'] = jsonArrayToStringList(jsonObject['jwt_pubkey_modulus_limbs'] as List);
+      if (jsonObject.containsKey('jwt_pubkey_modulus_limbs') &&
+          jsonObject['jwt_pubkey_modulus_limbs'] is List) {
+        inputs['jwt_pubkey_modulus_limbs'] = jsonArrayToStringList(
+          jsonObject['jwt_pubkey_modulus_limbs'] as List,
+        );
       }
 
-      if (jsonObject.containsKey('jwt_pubkey_redc_params_limbs') && jsonObject['jwt_pubkey_redc_params_limbs'] is List) {
-        inputs['jwt_pubkey_redc_params_limbs'] = jsonArrayToStringList(jsonObject['jwt_pubkey_redc_params_limbs'] as List);
+      if (jsonObject.containsKey('jwt_pubkey_redc_params_limbs') &&
+          jsonObject['jwt_pubkey_redc_params_limbs'] is List) {
+        inputs['jwt_pubkey_redc_params_limbs'] = jsonArrayToStringList(
+          jsonObject['jwt_pubkey_redc_params_limbs'] as List,
+        );
       }
 
-      if (jsonObject.containsKey('jwt_signature_limbs') && jsonObject['jwt_signature_limbs'] is List) {
-        inputs['jwt_signature_limbs'] = jsonArrayToStringList(jsonObject['jwt_signature_limbs'] as List);
+      if (jsonObject.containsKey('jwt_signature_limbs') &&
+          jsonObject['jwt_signature_limbs'] is List) {
+        inputs['jwt_signature_limbs'] = jsonArrayToStringList(
+          jsonObject['jwt_signature_limbs'] as List,
+        );
       }
 
-       if (jsonObject.containsKey('domain')) {
+      if (jsonObject.containsKey('domain')) {
         final domainData = jsonObject['domain'] as Map<String, dynamic>;
-        if (domainData.containsKey('storage') && domainData['storage'] is List) {
-          inputs['domain_storage'] = jsonArrayToStringList(domainData['storage'] as List);
+        if (domainData.containsKey('storage') &&
+            domainData['storage'] is List) {
+          inputs['domain_storage'] = jsonArrayToStringList(
+            domainData['storage'] as List,
+          );
         }
         if (domainData.containsKey('len')) {
           inputs['domain_len'] = [domainData['len'].toString()];
@@ -97,15 +119,21 @@ class MoproFlutter {
       }
 
       if (jsonObject.containsKey('ephemeral_pubkey')) {
-        inputs['ephemeral_pubkey'] = [jsonObject['ephemeral_pubkey'].toString()];
+        inputs['ephemeral_pubkey'] = [
+          jsonObject['ephemeral_pubkey'].toString(),
+        ];
       }
 
       if (jsonObject.containsKey('ephemeral_pubkey_salt')) {
-        inputs['ephemeral_pubkey_salt'] = [jsonObject['ephemeral_pubkey_salt'].toString()];
+        inputs['ephemeral_pubkey_salt'] = [
+          jsonObject['ephemeral_pubkey_salt'].toString(),
+        ];
       }
 
       if (jsonObject.containsKey('ephemeral_pubkey_expiry')) {
-        inputs['ephemeral_pubkey_expiry'] = [jsonObject['ephemeral_pubkey_expiry'].toString()];
+        inputs['ephemeral_pubkey_expiry'] = [
+          jsonObject['ephemeral_pubkey_expiry'].toString(),
+        ];
       }
       return inputs;
     } catch (e) {
@@ -114,7 +142,6 @@ class MoproFlutter {
     }
   }
 
-
   /// Generates a Jwt proof using the platform channel.
   ///
   /// Takes the path to the SRS file (must be accessible by native code,
@@ -122,34 +149,59 @@ class MoproFlutter {
   /// (use [parseJwtInputs] to generate from JSON).
   Future<ProveJwtResult?> proveJwt(
     String srsPath,
-    Map<String, List<String>> inputs
-    ) {
-      return MoproFlutterPlatform.instance.proveJwt(srsPath, inputs);
+    Map<String, List<String>> inputs,
+  ) {
+    return MoproFlutterPlatform.instance.proveJwt(srsPath, inputs);
   }
 
   /// Verifies a Jwt proof using the platform channel.
   ///
   /// Takes the path to the SRS file (must be accessible by native code,
   /// use [copyAssetToFileSystem] if needed) and the proof bytes.
-  Future<VerifyJwtResult?> verifyJwt(
-    String srsPath,
-    Uint8List proof
-  ) {
+  Future<VerifyJwtResult?> verifyJwt(String srsPath, Uint8List proof) {
     return MoproFlutterPlatform.instance.verifyJwt(srsPath, proof);
   }
 
   /// Verifies a Jwt proof using the platform channel.
   ///
   /// Takes the path to the SRS file (must be accessible by native code,
-  /// 
+  ///
   Future<VerifyJwtProofResult?> verifyJwtProof(
     String srsPath,
     Uint8List proof,
     String domain,
     String googleJwtPubkeyModulus,
     String ephemeralPubkey,
-    String ephemeralPubkeyExpiry
+    String ephemeralPubkeyExpiry,
   ) {
-    return MoproFlutterPlatform.instance.verifyJwtProof(srsPath, proof, domain, googleJwtPubkeyModulus, ephemeralPubkey, ephemeralPubkeyExpiry);
+    return MoproFlutterPlatform.instance.verifyJwtProof(
+      srsPath,
+      proof,
+      domain,
+      googleJwtPubkeyModulus,
+      ephemeralPubkey,
+      ephemeralPubkeyExpiry,
+    );
+  }
+
+  /// Signs a message using the platform channel.
+  ///
+  /// Takes the anon group id, text, internal flag, and ephemeral key.
+  Future<String> signMessage(
+    String anonGroupId,
+    String text,
+    bool internal,
+    String ephemeralPublicKey,
+    String ephemeralPrivateKey,
+    String ephemeralPubkeyExpiry,
+  ) {
+    return MoproFlutterPlatform.instance.signMessage(
+      anonGroupId,
+      text,
+      internal,
+      ephemeralPublicKey,
+      ephemeralPrivateKey,
+      ephemeralPubkeyExpiry,
+    );
   }
 }

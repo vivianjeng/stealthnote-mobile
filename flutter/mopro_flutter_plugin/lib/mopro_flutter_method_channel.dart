@@ -93,4 +93,27 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
       );
     }
   }
+
+  @override
+  Future<String> signMessage(
+    String anonGroupId,
+    String text,
+    bool internal,
+    String ephemeralPublicKey,
+    String ephemeralPrivateKey,
+    String ephemeralPubkeyExpiry,
+  ) async {
+    try {
+      final result = await methodChannel.invokeMethod<String>(
+        'signMessage',
+        {'anonGroupId': anonGroupId, 'text': text, 'internal': internal, 'ephemeralPublicKey': ephemeralPublicKey, 'ephemeralPrivateKey': ephemeralPrivateKey, 'ephemeralPubkeyExpiry': ephemeralPubkeyExpiry},
+      );
+      if (result == null) {
+        return 'Native method returned null';
+      }
+      return result;
+    } on PlatformException catch (e) {
+      return "Failed to sign message: '${e.message}'.";
+    }
+  }
 }

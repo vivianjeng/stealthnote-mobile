@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../firebase_options.dart';
 import '../services/auth_service.dart';
+import '../services/create_message.dart';
 import '../services/jwt_prover.dart';
 
 class SignInCard extends StatefulWidget {
@@ -13,6 +14,13 @@ class SignInCard extends StatefulWidget {
 class _SignInCardState extends State<SignInCard> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  final TextEditingController _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   // Google Sign-In function using AuthService
   // Update the _signInWithGoogle method in _SignInPageState class to navigate to HomePage
@@ -87,6 +95,7 @@ class _SignInCardState extends State<SignInCard> {
         child: Column(
           children: [
             TextField(
+              controller: _textController,
               decoration: InputDecoration(
                 hintText: 'What\'s happening at your company?',
                 border: InputBorder.none,
@@ -127,7 +136,19 @@ class _SignInCardState extends State<SignInCard> {
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              // Access the text when the post button is pressed
+                              final text = _textController.text;
+                              if (text.isNotEmpty) {
+                                createMessage(
+                                  text,
+                                  sliceEmail(snapshot.data!.email),
+                                  false, // internal
+                                );
+                                _textController
+                                    .clear(); // Clear the text field after posting
+                              }
+                            },
                             child: Text('Post'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFF3730A3),

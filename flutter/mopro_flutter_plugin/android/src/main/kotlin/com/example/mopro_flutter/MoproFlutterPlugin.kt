@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 import uniffi.mopro.proveJwt
 import uniffi.mopro.verifyJwt
 import uniffi.mopro.verifyJwtProof
+import uniffi.mopro.EphemeralKey
+import uniffi.mopro.signMessage
 
 /** MoproFlutterPlugin */
 class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
@@ -86,6 +88,26 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                   result.success(mapOf("isValid" to isValid, "error" to null))
                 }
               }
+              "signMessage" -> {
+                val anonGroupId = call.argument<String>("anonGroupId")
+                val text = call.argument<String>("text")
+                val internal = call.argument<Boolean>("internal")
+                  val ephemeralPublicKey = call.argument<String>("ephemeralPublicKey")
+                  val ephemeralPrivateKey = call.argument<String>("ephemeralPrivateKey")
+                val ephemeralPubkeyExpiry = call.argument<String>("ephemeralPubkeyExpiry")
+
+                if (anonGroupId == null || text == null || internal == null || ephemeralPublicKey == null || ephemeralPrivateKey == null || ephemeralPubkeyExpiry == null) {
+                  launch(Dispatchers.Main) {
+                    result.error("INVALID_ARGUMENTS", "anonGroupId or text or internal or ephemeralPublicKey or ephemeralPrivateKey or ephemeralPubkeyExpiry is null", null)
+                  }
+                  return@launch
+                }
+
+                val signedMessage = signMessage(anonGroupId!!, text!!, internal!!, ephemeralPublicKey!!, ephemeralPrivateKey!!, ephemeralPubkeyExpiry!!)
+                launch(Dispatchers.Main) {
+                  result.success(signedMessage)
+                }
+              }
               else -> {
                 launch(Dispatchers.Main) {
                   result.notImplemented()
@@ -97,6 +119,8 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
               when (call.method) {
                 "proveJwt" -> result.success(mapOf("proof" to null, "error" to e.message))
                 "verifyJwt" -> result.success(mapOf("isValid" to false, "error" to e.message))
+                "signMessage" -> result.success(mapOf("signedMessage" to null, "error" to e.message))
+                "verifyJwtProof" -> result.success(mapOf("isValid" to false, "error" to e.message))
                 else -> result.error("NATIVE_ERROR", e.message, e.stackTraceToString())
               }
             }

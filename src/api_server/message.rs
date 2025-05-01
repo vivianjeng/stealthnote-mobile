@@ -42,20 +42,20 @@ pub fn fetch_message(path: String) -> Vec<SignedMessage> {
 }
 
 #[derive(Serialize, Clone, Debug)]
-struct MessagePayload {
+pub struct MessagePayload {
     #[serde(flatten)]
-    signedMessage: SignedMessage,
+    pub signed_message: SignedMessage,
     // ephemeralPubkey: String,
     // signature: String,
 }
 
-#[derive(Serialize, Clone, Debug)]
-struct EphemeralKey {
-    ephemeralPubkeyHash: String,
-    ephemeralPubkeyExpiry: String,
-    privateKey: String,
-    publicKey: String,
-    salt: String,
+#[derive(uniffi::Record, Serialize, Clone, Debug)]
+pub struct EphemeralKey {
+    pub ephemeral_pubkey_hash: String,
+    pub ephemeral_pubkey_expiry: String,
+    pub private_key: String,
+    pub public_key: String,
+    pub salt: String,
 }
 
 fn get_timestamp_millis(timestamp_str: &str) -> i64 {
@@ -103,12 +103,15 @@ fn generate_short_id() -> String {
     format!("{}{}", parts[0], parts[1]) // join first two segments
 }
 
+#[uniffi::export]
 pub fn sign_message(
     anon_group_id: String,
     text: String,
     internal: bool,
-    ephemeral_key: EphemeralKey,
-) -> Result<SignedMessage> {
+    ephemeral_public_key: String,
+    ephemeral_private_key: String,
+    ephemeral_pubkey_expiry: String,
+) -> String {
     // timestamp
     let now = Utc::now();
     let timestamp = now.to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
@@ -116,9 +119,8 @@ pub fn sign_message(
     // id
     let id = generate_short_id();
 
-    let ephemeral_pubkey = ephemeral_key.publicKey.clone();
-    let ephemeral_pubkey_expiry = ephemeral_key.ephemeralPubkeyExpiry;
-    let private_key = BigUint::from_str(&ephemeral_key.privateKey).unwrap();
+    let ephemeral_pubkey_expiry = ephemeral_pubkey_expiry;
+    let private_key = BigUint::from_str(&ephemeral_private_key).unwrap();
 
     let message = Message {
         id,
@@ -131,38 +133,32 @@ pub fn sign_message(
     };
 
     let message_hash = hash_message(message.clone());
-    println!("message_hash: {:?}", message_hash);
 
     let signature = ed25519_sign(&message_hash, &big_int_to_bytes(&private_key, 32));
-    println!("signature: {:?}", signature);
-    return Ok(SignedMessage {
-        ephemeralPubkey: ephemeral_pubkey.clone(),
-        ephemeralPubkeyExpiry: ephemeral_pubkey_expiry,
-        id: message.id.clone(),
-        anonGroupId: message.anonGroupId.clone(),
-        anonGroupProvider: message.anonGroupProvider.clone(),
-        text: message.text.clone(),
-        timestamp: message.timestamp.clone(),
-        internal: message.internal,
-        signature: signature.to_string(),
-        likes: 0,
-    });
+    let payload = MessagePayload {
+        signed_message: SignedMessage {
+            ephemeralPubkey: ephemeral_public_key.clone(),
+            ephemeralPubkeyExpiry: ephemeral_pubkey_expiry,
+            id: message.id.clone(),
+            anonGroupId: message.anonGroupId.clone(),
+            anonGroupProvider: message.anonGroupProvider.clone(),
+            text: message.text.clone(),
+            timestamp: message.timestamp.clone(),
+            internal: message.internal,
+            signature: signature.to_string(),
+            likes: 0,
+        },
+    };
+    serde_json::to_string(&payload).unwrap()
 }
 
-pub async fn create_message(signed_message: SignedMessage) -> Result<()> {
+pub async fn create_message(signed_message_str: String) -> Result<()> {
     let client = Client::new();
-
-    let payload = MessagePayload {
-        // ephemeralPubkey: signed_message.ephemeralPubkey.to_string(),
-        // signature: signed_message.signature.to_string(),
-        signedMessage: signed_message,
-    };
-    println!("payload: {:?}", payload.clone());
 
     let response = client
         .post("http://localhost:3000/api/messages") // Change URL as needed
         .header("Content-Type", "application/json")
-        .json(&payload)
+        .body(signed_message_str)
         .send()
         .await?;
 
@@ -192,17 +188,24 @@ mod tests {
         let salt = "646645587996092179008704451306999156519169540151959619716525865713892520";
 
         let ephemeral_key = EphemeralKey {
-            ephemeralPubkeyHash: ephemeral_pubkey_hash.to_string(),
-            ephemeralPubkeyExpiry: expiry.to_string(),
-            privateKey: private_key.to_string(),
-            publicKey: public_key.to_string(),
+            ephemeral_pubkey_hash: ephemeral_pubkey_hash.to_string(),
+            ephemeral_pubkey_expiry: expiry.to_string(),
+            private_key: private_key.to_string(),
+            public_key: public_key.to_string(),
             salt: salt.to_string(),
         };
         let anon_group_id = "pse.dev".to_string();
         let internal = false;
         let text = "sent from Rust".to_string();
-        let signed_message = sign_message(anon_group_id, text, internal, ephemeral_key).unwrap();
-        create_message(signed_message).await.unwrap();
+        let signed_message_str = sign_message(
+            anon_group_id,
+            text,
+            internal,
+            public_key.to_string(),
+            private_key.to_string(),
+            expiry.to_string(),
+        );
+        create_message(signed_message_str).await.unwrap();
     }
 
     #[tokio::test]
@@ -219,6 +222,7 @@ mod tests {
             text: "gmgm2".to_string(),
             timestamp: "2025-05-01T03:45:34.421Z".to_string(),
         };
-        create_message(signed_message).await.unwrap();
+        let signed_message_str = serde_json::to_string(&signed_message).unwrap();
+        create_message(signed_message_str).await.unwrap();
     }
 }

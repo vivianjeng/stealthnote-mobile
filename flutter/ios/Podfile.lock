@@ -41,6 +41,8 @@ PODS:
   - FirebaseCoreInternal (11.10.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
   - Flutter (1.0.0)
+  - flutter_secure_storage (6.0.0):
+    - Flutter
   - google_sign_in_ios (0.0.1):
     - AppAuth (>= 1.7.4)
     - Flutter
@@ -100,6 +102,7 @@ DEPENDENCIES:
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - mopro_flutter (from `.symlinks/plugins/mopro_flutter/ios`)
@@ -131,6 +134,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
   google_sign_in_ios:
     :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   integration_test:
@@ -155,6 +160,7 @@ SPEC CHECKSUMS:
   FirebaseCoreExtension: 6f357679327f3614e995dc7cf3f2d600bdc774ac
   FirebaseCoreInternal: ef4505d2afb1d0ebbc33162cb3795382904b5679
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9
   GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d

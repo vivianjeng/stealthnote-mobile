@@ -99,4 +99,8 @@ abstract class MoproFlutterPlatform extends PlatformInterface {
   Future<VerifyJwtProofResult> verifyJwtProof(String srsPath, Uint8List proof, String domain, String googleJwtPubkeyModulus, String ephemeralPubkey, String ephemeralPubkeyExpiry) {
     throw UnimplementedError('verifyJwtProof() has not been implemented.');
   }
+
+  Future<String> signMessage(String anonGroupId, String text, bool internal, String ephemeralPublicKey, String ephemeralPrivateKey, String ephemeralPubkeyExpiry) {
+    throw UnimplementedError('signMessage() has not been implemented.');
+  }
 }
