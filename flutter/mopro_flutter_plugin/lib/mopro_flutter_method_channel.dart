@@ -22,12 +22,17 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
   @override
   Future<ProveJwtResult> proveJwt(
     String srsPath,
-    Map<String, List<String>> inputs,
+    String ephemeralPublicKey,
+    String ephemeralSalt,
+    String ephemeralExpiry,
+    String tokenId,
+    String jwt,
+    String domain,
   ) async {
     try {
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
         'proveJwt',
-        {'srsPath': srsPath, 'inputs': inputs},
+        {'srsPath': srsPath, 'ephemeralPublicKey': ephemeralPublicKey, 'ephemeralSalt': ephemeralSalt, 'ephemeralExpiry': ephemeralExpiry, 'tokenId': tokenId, 'jwt': jwt, 'domain': domain},
       );
       if (result == null) {
         return ProveJwtResult(error: 'Native method returned null');
@@ -35,28 +40,6 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
       return ProveJwtResult.fromMap(result);
     } on PlatformException catch (e) {
       return ProveJwtResult(error: "Failed to prove jwt: '${e.message}'.");
-    }
-  }
-
-  @override
-  Future<VerifyJwtResult> verifyJwt(String srsPath, Uint8List proof) async {
-    try {
-      final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
-        'verifyJwt',
-        {'srsPath': srsPath, 'proof': proof},
-      );
-      if (result == null) {
-        return VerifyJwtResult(
-          isValid: false,
-          error: 'Native method returned null',
-        );
-      }
-      return VerifyJwtResult.fromMap(result);
-    } on PlatformException catch (e) {
-      return VerifyJwtResult(
-        isValid: false,
-        error: "Failed to verify jwt: '${e.message}'.",
-      );
     }
   }
 

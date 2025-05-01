@@ -766,15 +766,13 @@ internal interface IntegrityCheckingUniffiLib : Library {
     // Integrity check functions only
     fun uniffi_mopro_bindings_checksum_func_create_membership(): Short
 
-    fun uniffi_mopro_bindings_checksum_func_fetch_message(): Short
-
     fun uniffi_mopro_bindings_checksum_func_generate_circom_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_generate_halo2_proof(): Short
 
-    fun uniffi_mopro_bindings_checksum_func_post_likes(): Short
+    fun uniffi_mopro_bindings_checksum_func_generate_noir_proof(): Short
 
-    fun uniffi_mopro_bindings_checksum_func_post_message(): Short
+    fun uniffi_mopro_bindings_checksum_func_post_likes(): Short
 
     fun uniffi_mopro_bindings_checksum_func_prove(): Short
 
@@ -788,9 +786,9 @@ internal interface IntegrityCheckingUniffiLib : Library {
 
     fun uniffi_mopro_bindings_checksum_func_verify_halo2_proof(): Short
 
-    fun uniffi_mopro_bindings_checksum_func_verify_jwt(): Short
-
     fun uniffi_mopro_bindings_checksum_func_verify_jwt_proof(): Short
+
+    fun uniffi_mopro_bindings_checksum_func_verify_noir_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_zkemail(): Short
 
@@ -842,11 +840,6 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): Byte
 
-    fun uniffi_mopro_bindings_fn_func_fetch_message(
-        `path`: RustBuffer.ByValue,
-        uniffi_out_err: UniffiRustCallStatus,
-    ): RustBuffer.ByValue
-
     fun uniffi_mopro_bindings_fn_func_generate_circom_proof(
         `zkeyPath`: RustBuffer.ByValue,
         `circuitInputs`: RustBuffer.ByValue,
@@ -861,6 +854,13 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): RustBuffer.ByValue
 
+    fun uniffi_mopro_bindings_fn_func_generate_noir_proof(
+        `circuitPath`: RustBuffer.ByValue,
+        `srsPath`: RustBuffer.ByValue,
+        `inputs`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): RustBuffer.ByValue
+
     fun uniffi_mopro_bindings_fn_func_post_likes(
         `pubKey`: RustBuffer.ByValue,
         `msgId`: Int,
@@ -869,17 +869,16 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): Int
 
-    fun uniffi_mopro_bindings_fn_func_post_message(
-        `message`: RustBuffer.ByValue,
-        `path`: RustBuffer.ByValue,
-        uniffi_out_err: UniffiRustCallStatus,
-    ): Int
-
     fun uniffi_mopro_bindings_fn_func_prove(uniffi_out_err: UniffiRustCallStatus): Byte
 
     fun uniffi_mopro_bindings_fn_func_prove_jwt(
         `srsPath`: RustBuffer.ByValue,
-        `inputs`: RustBuffer.ByValue,
+        `ephemeralPubkey`: RustBuffer.ByValue,
+        `ephemeralSalt`: RustBuffer.ByValue,
+        `ephemeralExpiry`: RustBuffer.ByValue,
+        `tokenId`: RustBuffer.ByValue,
+        `jwt`: RustBuffer.ByValue,
+        `domain`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): RustBuffer.ByValue
 
@@ -914,12 +913,6 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): Byte
 
-    fun uniffi_mopro_bindings_fn_func_verify_jwt(
-        `srsPath`: RustBuffer.ByValue,
-        `proof`: RustBuffer.ByValue,
-        uniffi_out_err: UniffiRustCallStatus,
-    ): Byte
-
     fun uniffi_mopro_bindings_fn_func_verify_jwt_proof(
         `srsPath`: RustBuffer.ByValue,
         `proof`: RustBuffer.ByValue,
@@ -927,6 +920,12 @@ internal interface UniffiLib : Library {
         `googleJwtPubkeyModulus`: RustBuffer.ByValue,
         `ephemeralPubkey`: RustBuffer.ByValue,
         `ephemeralPubkeyExpiry`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): Byte
+
+    fun uniffi_mopro_bindings_fn_func_verify_noir_proof(
+        `circuitPath`: RustBuffer.ByValue,
+        `proof`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): Byte
 
@@ -1168,25 +1167,22 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mopro_bindings_checksum_func_create_membership() != 40283.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_fetch_message() != 8815.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
     if (lib.uniffi_mopro_bindings_checksum_func_generate_circom_proof() != 1382.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_generate_halo2_proof() != 28088.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_post_likes() != 39054.toShort()) {
+    if (lib.uniffi_mopro_bindings_checksum_func_generate_noir_proof() != 8268.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_post_message() != 45932.toShort()) {
+    if (lib.uniffi_mopro_bindings_checksum_func_post_likes() != 39054.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_prove() != 46869.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_prove_jwt() != 64842.toShort()) {
+    if (lib.uniffi_mopro_bindings_checksum_func_prove_jwt() != 39642.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_prove_zkemail() != 12783.toShort()) {
@@ -1201,10 +1197,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mopro_bindings_checksum_func_verify_halo2_proof() != 24562.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_verify_jwt() != 40530.toShort()) {
+    if (lib.uniffi_mopro_bindings_checksum_func_verify_jwt_proof() != 17725.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_mopro_bindings_checksum_func_verify_jwt_proof() != 17725.toShort()) {
+    if (lib.uniffi_mopro_bindings_checksum_func_verify_noir_proof() != 57242.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_zkemail() != 8016.toShort()) {
@@ -1611,6 +1607,54 @@ public object FfiConverterTypeHalo2ProofResult : FfiConverterRustBuffer<Halo2Pro
     }
 }
 
+data class JsonWebKey(
+    var `kid`: kotlin.String,
+    var `n`: kotlin.String,
+    var `use`: kotlin.String,
+    var `alg`: kotlin.String,
+    var `kty`: kotlin.String,
+    var `e`: kotlin.String,
+) {
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeJsonWebKey : FfiConverterRustBuffer<JsonWebKey> {
+    override fun read(buf: ByteBuffer): JsonWebKey =
+        JsonWebKey(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+
+    override fun allocationSize(value: JsonWebKey) =
+        (
+            FfiConverterString.allocationSize(value.`kid`) +
+                FfiConverterString.allocationSize(value.`n`) +
+                FfiConverterString.allocationSize(value.`use`) +
+                FfiConverterString.allocationSize(value.`alg`) +
+                FfiConverterString.allocationSize(value.`kty`) +
+                FfiConverterString.allocationSize(value.`e`)
+        )
+
+    override fun write(
+        value: JsonWebKey,
+        buf: ByteBuffer,
+    ) {
+        FfiConverterString.write(value.`kid`, buf)
+        FfiConverterString.write(value.`n`, buf)
+        FfiConverterString.write(value.`use`, buf)
+        FfiConverterString.write(value.`alg`, buf)
+        FfiConverterString.write(value.`kty`, buf)
+        FfiConverterString.write(value.`e`, buf)
+    }
+}
+
 data class Member(
     var `provider`: Provider,
     var `pubkey`: kotlin.String,
@@ -1790,6 +1834,13 @@ sealed class MoproException : kotlin.Exception() {
             get() = "v1=${ v1 }"
     }
 
+    class NoirException(
+        val v1: kotlin.String,
+    ) : MoproException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+
     companion object ErrorHandler : UniffiRustCallStatusErrorHandler<MoproException> {
         override fun lift(error_buf: RustBuffer.ByValue): MoproException = FfiConverterTypeMoproError.lift(error_buf)
     }
@@ -1809,6 +1860,10 @@ public object FfiConverterTypeMoproError : FfiConverterRustBuffer<MoproException
                 MoproException.Halo2Exception(
                     FfiConverterString.read(buf),
                 )
+            3 ->
+                MoproException.NoirException(
+                    FfiConverterString.read(buf),
+                )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
 
@@ -1820,6 +1875,11 @@ public object FfiConverterTypeMoproError : FfiConverterRustBuffer<MoproException
                     FfiConverterString.allocationSize(value.v1)
             )
             is MoproException.Halo2Exception -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL +
+                    FfiConverterString.allocationSize(value.v1)
+            )
+            is MoproException.NoirException -> (
                 // Add the size for the Int that specifies the variant plus the size needed for all fields
                 4UL +
                     FfiConverterString.allocationSize(value.v1)
@@ -1838,6 +1898,11 @@ public object FfiConverterTypeMoproError : FfiConverterRustBuffer<MoproException
             }
             is MoproException.Halo2Exception -> {
                 buf.putInt(2)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+            is MoproException.NoirException -> {
+                buf.putInt(3)
                 FfiConverterString.write(value.v1, buf)
                 Unit
             }
@@ -1906,6 +1971,38 @@ public object FfiConverterTypeProvider : FfiConverterRustBuffer<Provider> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalString : FfiConverterRustBuffer<kotlin.String?> {
+    override fun read(buf: ByteBuffer): kotlin.String? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterString.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.String?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterString.allocationSize(value)
+        }
+    }
+
+    override fun write(
+        value: kotlin.String?,
+        buf: ByteBuffer,
+    ) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterString.write(value, buf)
+        }
+    }
+}
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceString : FfiConverterRustBuffer<List<kotlin.String>> {
     override fun read(buf: ByteBuffer): List<kotlin.String> {
         val len = buf.getInt()
@@ -1927,34 +2024,6 @@ public object FfiConverterSequenceString : FfiConverterRustBuffer<List<kotlin.St
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterString.write(it, buf)
-        }
-    }
-}
-
-/**
- * @suppress
- */
-public object FfiConverterSequenceTypeSignedMessage : FfiConverterRustBuffer<List<SignedMessage>> {
-    override fun read(buf: ByteBuffer): List<SignedMessage> {
-        val len = buf.getInt()
-        return List<SignedMessage>(len) {
-            FfiConverterTypeSignedMessage.read(buf)
-        }
-    }
-
-    override fun allocationSize(value: List<SignedMessage>): ULong {
-        val sizeForLength = 4UL
-        val sizeForItems = value.map { FfiConverterTypeSignedMessage.allocationSize(it) }.sum()
-        return sizeForLength + sizeForItems
-    }
-
-    override fun write(
-        value: List<SignedMessage>,
-        buf: ByteBuffer,
-    ) {
-        buf.putInt(value.size)
-        value.iterator().forEach {
-            FfiConverterTypeSignedMessage.write(it, buf)
         }
     }
 }
@@ -2014,16 +2083,6 @@ fun `createMembership`(
         },
     )
 
-fun `fetchMessage`(`path`: kotlin.String): List<SignedMessage> =
-    FfiConverterSequenceTypeSignedMessage.lift(
-        uniffiRustCall { _status ->
-            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_fetch_message(
-                FfiConverterString.lower(`path`),
-                _status,
-            )
-        },
-    )
-
 @Throws(MoproException::class)
 fun `generateCircomProof`(
     `zkeyPath`: kotlin.String,
@@ -2058,6 +2117,23 @@ fun `generateHalo2Proof`(
         },
     )
 
+@Throws(MoproException::class)
+fun `generateNoirProof`(
+    `circuitPath`: kotlin.String,
+    `srsPath`: kotlin.String?,
+    `inputs`: List<kotlin.String>,
+): kotlin.ByteArray =
+    FfiConverterByteArray.lift(
+        uniffiRustCallWithError(MoproException) { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_generate_noir_proof(
+                FfiConverterString.lower(`circuitPath`),
+                FfiConverterOptionalString.lower(`srsPath`),
+                FfiConverterSequenceString.lower(`inputs`),
+                _status,
+            )
+        },
+    )
+
 fun `postLikes`(
     `pubKey`: kotlin.String,
     `msgId`: kotlin.UInt,
@@ -2076,20 +2152,6 @@ fun `postLikes`(
         },
     )
 
-fun `postMessage`(
-    `message`: SignedMessage,
-    `path`: kotlin.String,
-): kotlin.UInt =
-    FfiConverterUInt.lift(
-        uniffiRustCall { _status ->
-            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_post_message(
-                FfiConverterTypeSignedMessage.lower(`message`),
-                FfiConverterString.lower(`path`),
-                _status,
-            )
-        },
-    )
-
 fun `prove`(): kotlin.Boolean =
     FfiConverterBoolean.lift(
         uniffiRustCall { _status ->
@@ -2101,13 +2163,23 @@ fun `prove`(): kotlin.Boolean =
 
 fun `proveJwt`(
     `srsPath`: kotlin.String,
-    `inputs`: Map<kotlin.String, List<kotlin.String>>,
+    `ephemeralPubkey`: kotlin.String,
+    `ephemeralSalt`: kotlin.String,
+    `ephemeralExpiry`: kotlin.String,
+    `tokenId`: kotlin.String,
+    `jwt`: kotlin.String,
+    `domain`: kotlin.String,
 ): kotlin.ByteArray =
     FfiConverterByteArray.lift(
         uniffiRustCall { _status ->
             UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_prove_jwt(
                 FfiConverterString.lower(`srsPath`),
-                FfiConverterMapStringSequenceString.lower(`inputs`),
+                FfiConverterString.lower(`ephemeralPubkey`),
+                FfiConverterString.lower(`ephemeralSalt`),
+                FfiConverterString.lower(`ephemeralExpiry`),
+                FfiConverterString.lower(`tokenId`),
+                FfiConverterString.lower(`jwt`),
+                FfiConverterString.lower(`domain`),
                 _status,
             )
         },
@@ -2185,20 +2257,6 @@ fun `verifyHalo2Proof`(
         },
     )
 
-fun `verifyJwt`(
-    `srsPath`: kotlin.String,
-    `proof`: kotlin.ByteArray,
-): kotlin.Boolean =
-    FfiConverterBoolean.lift(
-        uniffiRustCall { _status ->
-            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_verify_jwt(
-                FfiConverterString.lower(`srsPath`),
-                FfiConverterByteArray.lower(`proof`),
-                _status,
-            )
-        },
-    )
-
 fun `verifyJwtProof`(
     `srsPath`: kotlin.String,
     `proof`: kotlin.ByteArray,
@@ -2216,6 +2274,21 @@ fun `verifyJwtProof`(
                 FfiConverterString.lower(`googleJwtPubkeyModulus`),
                 FfiConverterString.lower(`ephemeralPubkey`),
                 FfiConverterString.lower(`ephemeralPubkeyExpiry`),
+                _status,
+            )
+        },
+    )
+
+@Throws(MoproException::class)
+fun `verifyNoirProof`(
+    `circuitPath`: kotlin.String,
+    `proof`: kotlin.ByteArray,
+): kotlin.Boolean =
+    FfiConverterBoolean.lift(
+        uniffiRustCallWithError(MoproException) { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_verify_noir_proof(
+                FfiConverterString.lower(`circuitPath`),
+                FfiConverterByteArray.lower(`proof`),
                 _status,
             )
         },

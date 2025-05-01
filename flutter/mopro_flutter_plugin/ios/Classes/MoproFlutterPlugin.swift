@@ -43,15 +43,28 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
       case "proveJwt":
         guard let args = call.arguments as? [String: Any],
           let srsPath = args["srsPath"] as? String,
-          let inputs = args["inputs"] as? [String: [String]]
+          let ephemeralPublicKey = args["ephemeralPublicKey"] as? String,
+          let ephemeralSalt = args["ephemeralSalt"] as? String,
+          let ephemeralExpiry = args["ephemeralExpiry"] as? String,
+          let tokenId = args["tokenId"] as? String,
+          let jwt = args["jwt"] as? String,
+          let domain = args["domain"] as? String
         else {
-          dispatchError("INVALID_ARGUMENTS", "srsPath or inputs is null or invalid format", nil)
+          dispatchError("INVALID_ARGUMENTS", "srsPath, ephemeralPublicKey, ephemeralSalt, ephemeralExpiry, tokenId, jwt, domain are null or invalid format", nil)
           return
         }
         do {
           // Note: The mopro.swift binding `proveZkemail` doesn't throw currently,
           // but we include a do-catch for future-proofing and consistency.
-          let proofBytes = proveJwt(srsPath: srsPath, inputs: inputs)
+          let proofBytes = proveJwt(
+            srsPath: srsPath,
+            ephemeralPubkey: ephemeralPublicKey,
+            ephemeralSalt: ephemeralSalt,
+            ephemeralExpiry: ephemeralExpiry,
+            tokenId: tokenId,
+            jwt: jwt,
+            domain: domain
+          )
           // Wrap the result in the format expected by Dart
           let resultMap: [String: Any?] = [
             "proof": FlutterStandardTypedData(bytes: proofBytes), "error": nil,
@@ -60,25 +73,6 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
         } catch {
           // If proveZkemail were to throw, handle it here
           let resultMap: [String: Any?] = ["proof": nil, "error": error.localizedDescription]
-          dispatchResult(resultMap)
-        }
-      case "verifyJwt":
-        guard let args = call.arguments as? [String: Any],
-          let srsPath = args["srsPath"] as? String,
-          let proofData = args["proof"] as? FlutterStandardTypedData
-        else {
-          dispatchError("INVALID_ARGUMENTS", "srsPath or proof is null or invalid format", nil)
-          return
-        }
-        do {
-          // Note: The mopro.swift binding `verifyZkemail` doesn't throw currently.
-          let isValid = verifyJwt(srsPath: srsPath, proof: proofData.data)
-          // Wrap the result in the format expected by Dart
-          let resultMap: [String: Any?] = ["isValid": isValid, "error": nil]
-          dispatchResult(resultMap)
-        } catch {
-          // If verifyZkemail were to throw, handle it here
-          let resultMap: [String: Any?] = ["isValid": false, "error": error.localizedDescription]
           dispatchResult(resultMap)
         }
       case "verifyJwtProof":

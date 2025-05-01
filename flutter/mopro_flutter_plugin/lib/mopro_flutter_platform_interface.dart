@@ -20,22 +20,6 @@ class ProveJwtResult {
   }
 }
 
-/// Represents the result of a zkEmail verification operation.
-class VerifyJwtResult {
-  final bool isValid;
-  final String? error;
-
-  VerifyJwtResult({required this.isValid, this.error});
-
-    /// Creates a result object from a map, typically returned by the method channel.
-  factory VerifyJwtResult.fromMap(Map<dynamic, dynamic> map) {
-    return VerifyJwtResult(
-      isValid: map['isValid'] ?? false,
-      error: map['error'],
-    );
-  }
-}
-
 class VerifyJwtProofResult {
   final bool isValid;
   final String? error;
@@ -85,16 +69,10 @@ abstract class MoproFlutterPlatform extends PlatformInterface {
   /// Takes the path to the Serialized Rekeying Set (SRS) file and the inputs map.
   /// The inputs map structure should match the one expected by the native mopro library,
   /// derived from the zkemail_input.json structure.
-  Future<ProveJwtResult> proveJwt(String srsPath, Map<String, List<String>> inputs) {
+  Future<ProveJwtResult> proveJwt(String srsPath, String ephemeralPublicKey, String ephemeralSalt, String ephemeralExpiry, String tokenId, String jwt, String domain) {
     throw UnimplementedError('proveJwt() has not been implemented.');
   }
 
-  /// Verifies a zkEmail proof.
-  ///
-  /// Takes the path to the SRS file and the proof bytes.
-  Future<VerifyJwtResult> verifyJwt(String srsPath, Uint8List proof) {
-    throw UnimplementedError('verifyJwt() has not been implemented.');
-  }
 
   Future<VerifyJwtProofResult> verifyJwtProof(String srsPath, Uint8List proof, String domain, String googleJwtPubkeyModulus, String ephemeralPubkey, String ephemeralPubkeyExpiry) {
     throw UnimplementedError('verifyJwtProof() has not been implemented.');

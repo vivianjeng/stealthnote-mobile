@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
 
 import 'fetch_googleJWTpubKey.dart';
+import 'google_jwt_prover.dart';
 
 Map<String, dynamic> parseJwtHeader(String? idToken) {
   if (idToken == null) {
@@ -44,34 +45,75 @@ class AuthService {
   // Stream of auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Sign in with Google
-  Future<UserCredential?> signInWithGoogle() async {
+  String sliceEmail(dynamic email) {
+    return email.substring(email.indexOf('@') + 1);
+  }
+
+  Future<GoogleSignInAuthentication> getGoogleAuth() async {
     try {
-      // Begin Google Sign-In process
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       // If user cancels the sign-in process
       if (googleUser == null) {
-        return null;
+        throw Exception('Google sign in failed');
       }
 
-      // Obtain auth details from the Google Sign-In
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      return await googleUser.authentication;
+    } catch (e) {
+      print('Error getting Google authentication: $e');
+      rethrow; // Rethrow to let the UI layer handle the error
+    }
+  }
 
-      // Create a credential from the Google Sign-In details
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+  Future<OAuthCredential?> getGoogleCredential(
+      GoogleSignInAuthentication googleAuth) async {
+    try {
+      return GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+    } catch (e) {
+      print('Error getting Google credential: $e');
+      rethrow; // Rethrow to let the UI layer handle the error
+    }
+  }
 
-      final idToken = googleAuth.idToken;
-      final header = parseJwtHeader(idToken);
-      final payload = parseJwtPayload(idToken);
+  // Sign in with Google
+  Future<UserCredential?> signInWithGoogle(OAuthCredential? credential) async {
+    try {
+      if (credential == null) {
+        throw Exception('Google credential is null');
+      }
+      // // Begin Google Sign-In process
+      // final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-      final googlePublicKey = await fetchGooglePublicKey(header['kid']);
+      // // If user cancels the sign-in process
+      // if (googleUser == null) {
+      //   return null;
+      // }
+
+      // // Obtain auth details from the Google Sign-In
+      // final GoogleSignInAuthentication googleAuth =
+      //     await googleUser.authentication;
+
+      // // Create a credential from the Google Sign-In details
+      // final OAuthCredential credential = GoogleAuthProvider.credential(
+      //   accessToken: googleAuth.accessToken,
+      //   idToken: googleAuth.idToken,
+      // );
+
+      // final idToken = googleAuth.idToken;
+      // final header = parseJwtHeader(idToken);
+      // final payload = parseJwtPayload(idToken);
+
+      // final googlePublicKey = await fetchGooglePublicKey(header['kid']);
       // print('idToken: $idToken');
       // print('Google Public Key: $googlePublicKey');
+      // generateJwtProof(
+      //   googlePublicKey.toString(),
+      //   idToken,
+      //   sliceEmail(payload['email']),
+      // );
 
       // Sign in to Firebase with the Google credential
       return await _auth.signInWithCredential(credential);

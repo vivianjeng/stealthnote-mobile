@@ -129,14 +129,14 @@ pub fn prove_jwt(
     srs_path: String,
     ephemeral_pubkey: String,
     ephemeral_salt: String,
-    ephemeral_expiry: u32,
+    ephemeral_expiry: String,
     token_id: String,
-    jwt: JsonWebKey,
+    jwt: String, // jwt is a stringified JsonWebKey
     domain: String,
 ) -> Vec<u8> {
     let circuit_input = generate_inputs(
-        token_id.as_str(),
-        &jwt,
+        &token_id,
+        &serde_json::from_str(&jwt).unwrap(),
         Some(vec!["email", "email_verified", "nonce"]),
         640,
     )
@@ -295,14 +295,15 @@ mod tests {
         let domain = "pse.dev".to_string();
 
         // Now produce the proof as usual
+        let pubkey_str = serde_json::to_string(&pubkey).unwrap();
         let proof = prove_jwt(
             srs_path.clone(),
             "2162762795874508908128591380947689712526020850672181221274190323882846535333"
                 .to_string(),
             "646645587996092179008704451306999156519169540151959619716525865713892520".to_string(),
-            1746608877u32,
+            "1746608877".to_string(),
             id_token.to_string(),
-            pubkey,
+            pubkey_str,
             domain,
         );
         assert!(!proof.is_empty(), "Proof should not be empty");

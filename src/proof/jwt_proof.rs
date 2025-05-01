@@ -15,7 +15,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, str::FromStr};
 
-#[derive(uniffi::Record, Debug, Deserialize, Clone)]
+#[derive(uniffi::Record, Debug, Deserialize, Serialize, Clone)]
 pub struct JsonWebKey {
     pub kid: String,
     pub n: String,
@@ -92,7 +92,7 @@ pub fn generate_inputs(
         });
         inputs.base64_decode_offset = header_b64.len() + 1;
     } else {
-        let payload_string = String::from_utf8(base64::decode(payload_b64)?)?;
+        let payload_string = String::from_utf8(URL_SAFE_NO_PAD.decode(payload_b64)?)?;
         let min_index = sha_precompute_keys
             .unwrap()
             .iter()
@@ -242,7 +242,7 @@ struct GoogleCertsResponse {
     keys: Vec<GooglePublicKey>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct GooglePublicKey {
     kid: String,
     kty: String,

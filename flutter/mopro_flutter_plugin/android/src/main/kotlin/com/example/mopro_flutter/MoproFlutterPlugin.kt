@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 import uniffi.mopro.proveJwt
-import uniffi.mopro.verifyJwt
 import uniffi.mopro.verifyJwtProof
 import uniffi.mopro.EphemeralKey
 import uniffi.mopro.signMessage
@@ -44,8 +43,12 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
               }
               "proveJwt" -> {
                 val srsPath = call.argument<String>("srsPath")
-                @Suppress("UNCHECKED_CAST")
-                val inputs = call.argument<Map<String, List<String>>>("inputs")
+                val ephemeralPublicKey = call.argument<String>("ephemeralPublicKey")
+                val ephemeralSalt = call.argument<String>("ephemeralSalt")
+                val ephemeralExpiry = call.argument<String>("ephemeralExpiry")
+                val tokenId = call.argument<String>("tokenId")
+                val jwt = call.argument<String>("jwt")
+                val domain = call.argument<String>("domain")
     
                 if (srsPath == null || inputs == null) {
                   launch(Dispatchers.Main) {
@@ -54,25 +57,9 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                   return@launch
                 }
     
-                val proofBytes = proveJwt(srsPath!!, inputs!!)
+                val proofBytes = proveJwt(srsPath!!, ephemeralPublicKey!!, ephemeralSalt!!, ephemeralExpiry!!, tokenId!!, jwt!!, domain!!)
                 launch(Dispatchers.Main) {
                   result.success(mapOf("proof" to proofBytes, "error" to null))
-                }
-              }
-              "verifyJwt" -> {
-                val srsPath = call.argument<String>("srsPath")
-                val proof = call.argument<ByteArray>("proof")
-    
-                if (srsPath == null || proof == null) {
-                  launch(Dispatchers.Main) {
-                    result.error("INVALID_ARGUMENTS", "srsPath or proof is null", null)
-                  }
-                  return@launch
-                }
-    
-                val isValid = verifyJwt(srsPath!!, proof!!)
-                launch(Dispatchers.Main) {
-                  result.success(mapOf("isValid" to isValid, "error" to null))
                 }
               }
               "verifyJwtProof" -> {
@@ -118,7 +105,6 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
             launch(Dispatchers.Main) {
               when (call.method) {
                 "proveJwt" -> result.success(mapOf("proof" to null, "error" to e.message))
-                "verifyJwt" -> result.success(mapOf("isValid" to false, "error" to e.message))
                 "signMessage" -> result.success(mapOf("signedMessage" to null, "error" to e.message))
                 "verifyJwtProof" -> result.success(mapOf("isValid" to false, "error" to e.message))
                 else -> result.error("NATIVE_ERROR", e.message, e.stackTraceToString())

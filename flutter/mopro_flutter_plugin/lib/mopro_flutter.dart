@@ -149,17 +149,22 @@ class MoproFlutter {
   /// (use [parseJwtInputs] to generate from JSON).
   Future<ProveJwtResult?> proveJwt(
     String srsPath,
-    Map<String, List<String>> inputs,
+    String ephemeralPublicKey,
+    String ephemeralSalt,
+    String ephemeralExpiry,
+    String tokenId,
+    String jwt,
+    String domain,
   ) {
-    return MoproFlutterPlatform.instance.proveJwt(srsPath, inputs);
-  }
-
-  /// Verifies a Jwt proof using the platform channel.
-  ///
-  /// Takes the path to the SRS file (must be accessible by native code,
-  /// use [copyAssetToFileSystem] if needed) and the proof bytes.
-  Future<VerifyJwtResult?> verifyJwt(String srsPath, Uint8List proof) {
-    return MoproFlutterPlatform.instance.verifyJwt(srsPath, proof);
+    return MoproFlutterPlatform.instance.proveJwt(
+      srsPath,
+      ephemeralPublicKey,
+      ephemeralSalt,
+      ephemeralExpiry,
+      tokenId,
+      jwt,
+      domain,
+    );
   }
 
   /// Verifies a Jwt proof using the platform channel.
