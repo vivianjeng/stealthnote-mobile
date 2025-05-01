@@ -2,7 +2,7 @@ use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
 use super::{AnonGroup, AnonGroupProvider, EphemeralKey};
-use crate::proof::jwt_proof;
+use crate::{proof::jwt_proof, prove_jwt};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -10,12 +10,12 @@ pub struct GoogleOAuthProvider;
 
 impl AnonGroupProvider for GoogleOAuthProvider {
     fn name() -> String {
-        "".to_string()
+        "google-oauth".to_string()
     }
 
     /** Slug is a key that represents the type of the AnonGroup identifier (to be used in URLs). Example: "domain" */
     fn get_slug() -> String {
-        "".to_string()
+        "domain".to_string()
     }
 
     /**
@@ -27,8 +27,9 @@ impl AnonGroupProvider for GoogleOAuthProvider {
         ephemeral_key: EphemeralKey,
         inputs: HashMap<String, Vec<String>>,
     ) -> Vec<u8> {
-        const JWT_SRS: &str = "../../../public/jwt-srs.local";
-        jwt_proof::prove_jwt(JWT_SRS.to_string(), inputs)
+        // const JWT_SRS: &str = "../../../public/jwt-srs.local";
+        // prove_jwt(JWT_SRS.to_string(), inputs)
+        vec![]
     }
 
     /**
@@ -46,8 +47,9 @@ impl AnonGroupProvider for GoogleOAuthProvider {
         ephemeral_pubkey_expiry: String,
         proof_args: HashMap<String, Vec<String>>,
     ) -> bool {
-        const JWT_SRS: &str = "../../../public/jwt-srs.local";
-        jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
+        // const JWT_SRS: &str = "../../../public/jwt-srs.local";
+        // jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
+        true
     }
 
     /**

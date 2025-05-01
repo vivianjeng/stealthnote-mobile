@@ -1,9 +1,6 @@
 use std::{mem, str::FromStr};
 
-use super::{
-    api::{file::FileApi, Api},
-    Message, SignedMessage,
-};
+use super::{api::Api, Message, SignedMessage};
 use anyhow::{bail, Ok, Result};
 use chrono::{DateTime, Utc};
 use ed25519_dalek::{Signature, Signer, SigningKey};
@@ -13,31 +10,10 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
-pub fn post_message(message: SignedMessage, path: String) -> Result<u32> {
-    let member = FileApi::get_member(
-        BigUint::from_str(&message.ephemeralPubkey).unwrap(),
-        path.clone(),
-    )
-    .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-    if member.group_id != message.anonGroupId
-    // || member.provider != message.anon_group_provider
-    {
-        bail!("Not registered member")
-    }
-
-    let parsed_ephemeral_pubkey_expiry: DateTime<Utc> = message
-        .ephemeralPubkeyExpiry
-        .parse::<DateTime<Utc>>()
-        .expect("Invalid datetime format");
-    if parsed_ephemeral_pubkey_expiry < Utc::now() {
-        bail!("Ephemeral pubkey expired")
-    }
-
-    FileApi::insert_message(message, path)
-}
 
 pub fn fetch_message(path: String) -> Vec<SignedMessage> {
-    FileApi::get_latest_message(10, path).unwrap()
+    vec![]
+    // FileApi::get_latest_message(10, path).unwrap()
     // .map_err(|e| anyhow::anyhow!(e.to_string()))?;
 }
 

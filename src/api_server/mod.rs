@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use ed25519::Signature;
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
@@ -39,7 +40,7 @@ impl Provider {
     }
 }
 
-#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Clone)]
 pub struct Member {
     pub provider: Provider,
     pub pubkey: String, // BigUint
