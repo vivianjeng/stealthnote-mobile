@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
@@ -18,11 +20,11 @@ pub enum Provider {
 impl Provider {
     pub fn verify_proof(
         &self,
-        proof: String,
-        anon_group_id: u32,
+        proof: Vec<u8>,
+        anon_group_id: String,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: u32,
-        proof_args: String,
+        ephemeral_pubkey_expiry: String,
+        proof_args: HashMap<String, Vec<String>>,
     ) -> bool {
         match self {
             Self::Google => GoogleOAuthProvider::verify_proof(
@@ -41,22 +43,33 @@ impl Provider {
 pub struct Member {
     pub provider: Provider,
     pub pubkey: String, // BigUint
-    pub pubkey_expiry: u32,
-    pub proof: String,
-    pub proof_args: String,
-    pub group_id: u32,
+    pub pubkey_expiry: String,
+    pub proof: Vec<u8>,
+    pub proof_args: HashMap<String, Vec<String>>,
+    pub group_id: String,
 }
 
-#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Serialize, Deserialize, Clone, Debug)]
+pub struct Message {
+    pub id: String,
+    pub anonGroupId: String,
+    pub anonGroupProvider: String,
+    pub text: String,
+    pub timestamp: String,
+    pub internal: bool,
+    pub likes: u32,
+}
+
+#[derive(uniffi::Record, Serialize, Deserialize, Clone, Debug)]
 pub struct SignedMessage {
-    id: u32,
-    anon_group_id: u32,
-    anon_group_provider: Provider,
-    text: String,
-    timestamp: u32,
-    internal: bool,
-    signature: String,        // BigUint
-    ephemeral_pubkey: String, // BigUint
-    ephemeral_pubkey_expiry: u32,
-    likes: Vec<String>, // list of pub_key
+    pub id: String,
+    pub anonGroupId: String,
+    pub anonGroupProvider: String,
+    pub text: String,
+    pub timestamp: String,
+    pub internal: bool,
+    pub signature: String,
+    pub ephemeralPubkey: String,
+    pub ephemeralPubkeyExpiry: String,
+    pub likes: u32,
 }

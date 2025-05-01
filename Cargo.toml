@@ -23,6 +23,7 @@ num-bigint = "0.4"
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
 
 # build for Android
 noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg", "android-compat"] }
@@ -30,6 +31,8 @@ anyhow = "1.0.98"
 chrono = "0.4.40"
 hex = "0.4.3"
 byteorder = "1.5.0"
+sha2 = "0.10.9"
+ed25519-dalek = "2.1.1"
 # build for iOS
 # noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg"] }
 

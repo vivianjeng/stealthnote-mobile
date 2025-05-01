@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use num_bigint::BigUint;
 
 pub mod google;
@@ -32,7 +34,10 @@ pub trait AnonGroupProvider {
      * @param ephemeralPubkeyHash - Hash of the ephemeral pubkey, expiry and salt
      * @returns Returns the AnonGroup and membership proof, along with additional args that may be needed for verification
      */
-    fn generate_proof(ephemeral_key: EphemeralKey) -> (String, AnonGroup, String);
+    fn generate_proof(
+        ephemeral_key: EphemeralKey,
+        inputs: HashMap<String, Vec<String>>,
+    ) -> Vec<u8>;
 
     /**
      * Verify a ZK proof of group membership
@@ -43,11 +48,11 @@ pub trait AnonGroupProvider {
      * @returns Promise resolving to true if the proof is valid
      */
     fn verify_proof(
-        proof: String,
-        anon_group_id: u32,
+        proof: Vec<u8>,
+        anon_group_id: String,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: u32,
-        proof_args: String,
+        ephemeral_pubkey_expiry: String,
+        proof_args: HashMap<String, Vec<String>>,
     ) -> bool;
 
     /**
