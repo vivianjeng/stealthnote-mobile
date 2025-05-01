@@ -2,7 +2,7 @@
 // write some functions and bind them to FFI type
 mopro_ffi::app!();
 
-use api_server::{Member, Message, SignedMessage};
+use api_server::Member;
 use noir::{
     barretenberg::{
         prove::prove_ultra_honk,
@@ -12,10 +12,7 @@ use noir::{
     },
     witness::from_vec_str_to_witness_map,
 };
-use proof::{
-    emphemeral_key::EphemeralKey,
-    jwt_proof::{generate_inputs, generate_jwt_proof, JsonWebKey, StorageBlock},
-};
+use proof::jwt_proof::{generate_inputs, generate_jwt_proof, JsonWebKey, StorageBlock};
 use std::collections::HashMap;
 
 mod api_server;
@@ -240,8 +237,22 @@ fn encode_domain_field(domain: &str, fixed_len: usize) -> StorageBlock {
 }
 
 #[uniffi::export]
-pub fn verify_jwt(srs_path: String, proof: Vec<u8>) -> bool {
-    proof::jwt_proof::verify_jwt_proof_old(srs_path, proof)
+fn verify_jwt_proof(
+    srs_path: String,
+    proof: Vec<u8>,
+    domain: String,
+    google_jwt_pubkey_modulus: String,
+    ephemeral_pubkey: String,
+    ephemeral_pubkey_expiry: String,
+) -> bool {
+    proof::jwt_proof::verify_jwt_proof(
+        srs_path,
+        proof,
+        domain,
+        google_jwt_pubkey_modulus,
+        ephemeral_pubkey,
+        ephemeral_pubkey_expiry,
+    )
 }
 
 //

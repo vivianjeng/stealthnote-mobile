@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::{prelude::BASE64_URL_SAFE_NO_PAD, Engine};
 use byteorder::{BigEndian, ByteOrder};
 use chrono::{DateTime, Utc};
@@ -13,7 +13,7 @@ use noir::{
 use num_bigint::BigUint;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, str::FromStr, time::UNIX_EPOCH};
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(uniffi::Record, Debug, Deserialize, Clone)]
 pub struct JsonWebKey {
@@ -174,7 +174,7 @@ pub fn generate_jwt_proof(srs_path: String, inputs: HashMap<String, Vec<String>>
     proof
 }
 
-pub fn verify_jwt_proof_old(srs_path: String, proof: Vec<u8>) -> bool {
+pub fn verify_jwt(srs_path: String, proof: Vec<u8>) -> bool {
     const JWT_JSON: &str = include_str!("../../circuit/stealthnote_jwt.json");
     let bytecode_json: serde_json::Value = serde_json::from_str(&JWT_JSON).unwrap();
     let bytecode = bytecode_json["bytecode"].as_str().unwrap();
@@ -396,8 +396,7 @@ fn prepare_public_inputs(
     public_inputs
 }
 
-#[uniffi::export]
-fn verify_jwt_proof(
+pub fn verify_jwt_proof(
     srs_path: String,
     proof: Vec<u8>,
     domain: String,
@@ -420,7 +419,7 @@ fn verify_jwt_proof(
 
     let proof = reconstruct_honk_proof(&flatten_fields_as_array(&public_inputs), &proof, 32);
 
-    let verified = verify_jwt_proof_old(srs_path, proof);
+    let verified = verify_jwt(srs_path, proof);
     verified
 }
 

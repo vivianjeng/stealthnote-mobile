@@ -23,13 +23,6 @@ num-bigint = "0.4"
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 base64 = "0.22"
-
-# build for Android
-noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg", "android-compat"] }
-anyhow = "1.0.98"
-chrono = "0.4.40"
-hex = "0.4.3"
-byteorder = "1.5.0"
 ed25519 = "2.2.3"
 ed25519-dalek = { version = "2.1.1", features = ["rand_core"] }
 rand = "0.8"
@@ -38,8 +31,15 @@ light-poseidon = "=0.3.0"
 ark-bn254 = "0.5.0"
 ark-ff = "0.5.0"
 sha256 = "1.6.0"
-base64 = "0.22.1"
 sha2 = "0.10"
+anyhow = "1.0.98"
+
+# build for Android
+noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg", "android-compat"] }
+chrono = "0.4.40"
+hex = "0.4.3"
+byteorder = "1.5.0"
+
 
 # build for iOS
 # noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg"] }
