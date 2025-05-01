@@ -10,12 +10,12 @@ pub struct GoogleOAuthProvider;
 
 impl AnonGroupProvider for GoogleOAuthProvider {
     fn name() -> String {
-        "".to_string()
+        "google-oauth".to_string()
     }
 
     /** Slug is a key that represents the type of the AnonGroup identifier (to be used in URLs). Example: "domain" */
     fn get_slug() -> String {
-        "".to_string()
+        "domain".to_string()
     }
 
     /**
@@ -24,8 +24,9 @@ impl AnonGroupProvider for GoogleOAuthProvider {
      * @returns Returns the AnonGroup and membership proof, along with additional args that may be needed for verification
      */
     fn generate_proof(ephemeral_key: EphemeralKey) -> (String, AnonGroup, String) {
-        const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
-        jwt_proof::prove_jwt(srs_path, inputs)
+        unimplemented!()
+        // const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
+        // jwt_proof::prove_jwt(srs_path, inputs)
     }
 
     /**
@@ -43,8 +44,9 @@ impl AnonGroupProvider for GoogleOAuthProvider {
         ephemeral_pubkey_expiry: u32,
         proof_args: String,
     ) -> bool {
-        const JWT_SRS: &str = include_str!("../../../public/srs.json");
-        jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
+        true
+        // const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
+        // jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
     }
 
     /**

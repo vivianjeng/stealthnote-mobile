@@ -2,7 +2,7 @@ use super::{Member, SignedMessage};
 use anyhow::Result;
 use num_bigint::BigUint;
 
-pub mod file;
+// pub mod file;
 
 pub trait Api {
     // members
