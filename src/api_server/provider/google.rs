@@ -10,12 +10,12 @@ pub struct GoogleOAuthProvider;
 
 impl AnonGroupProvider for GoogleOAuthProvider {
     fn name() -> String {
-        "".to_string()
+        "google-oauth".to_string()
     }
 
     /** Slug is a key that represents the type of the AnonGroup identifier (to be used in URLs). Example: "domain" */
     fn get_slug() -> String {
-        "".to_string()
+        "domain".to_string()
     }
 
     /**

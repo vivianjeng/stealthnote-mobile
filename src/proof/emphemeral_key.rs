@@ -1,7 +1,9 @@
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use crate::api_server::{Message, SignedMessage};
 use ark_bn254::Fr;
 use ark_ff::PrimeField;
-use ed25519::signature::{self, SignerMut};
+use ed25519::signature::SignerMut;
 use ed25519::Signature;
 use ed25519_dalek::Verifier;
 use ed25519_dalek::{SigningKey, VerifyingKey};
@@ -9,14 +11,12 @@ use light_poseidon::{Poseidon, PoseidonHasher};
 use num_bigint::BigUint;
 use rand::rngs::OsRng;
 use sha256;
-use std::ops::Div;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone, Debug)]
 pub struct EphemeralKey {
     private_key: SigningKey,
     pub public_key: VerifyingKey,
-    salt: BigUint,
+    pub salt: BigUint,
     pub expiry: u32,
     pub ephemeral_pubkey_hash: BigUint,
 }
@@ -28,7 +28,6 @@ impl EphemeralKey {
         let verifying_key = signing_key.verifying_key();
 
         let salt: SigningKey = SigningKey::generate(&mut csprng);
-
         let expiry = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -39,7 +38,7 @@ impl EphemeralKey {
 
         let input1 = Fr::from_be_bytes_mod_order(&verifying_key.as_bytes()[..29]);
         let input2 = Fr::from_be_bytes_mod_order(&salt.to_bytes());
-        let input3 = Fr::from(expiry.div(1000));
+        let input3 = Fr::from(expiry);
 
         let hash = poseidon.hash(&[input1, input2, input3]).unwrap();
 
