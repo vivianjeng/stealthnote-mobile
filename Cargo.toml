@@ -38,6 +38,8 @@ light-poseidon = "=0.3.0"
 ark-bn254 = "0.5.0"
 ark-ff = "0.5.0"
 sha256 = "1.6.0"
+base64 = "0.22.1"
+sha2 = "0.10"
 
 # build for iOS
 # noir = { git = "https://github.com/zkmopro/noir-rs", features = ["barretenberg"] }
