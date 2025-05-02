@@ -43,12 +43,15 @@ class _SignInCardState extends State<SignInCard> {
 
     try {
       // Use the AuthService to handle Google Sign-In
-      final GoogleSignInAuthentication googleAuth =
-          await _authService.getGoogleAuth();
-      final OAuthCredential? credential = await _authService
-          .getGoogleCredential(googleAuth);
-      final UserCredential? userCredential = await _authService
-          .signInWithGoogle(credential);
+      // final GoogleSignInAuthentication googleAuth =
+      //     await _authService.getGoogleAuth();
+      // final OAuthCredential? credential = await _authService
+      //     .getGoogleCredential(googleAuth);
+      // final UserCredential? userCredential = await _authService
+      //     .signInWithGoogle(credential);
+      final String? idToken = await _authService.signInManually("622618718926420486498127001071856504322492650656283936596477869965459887546");
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
+      final UserCredential? userCredential = await _authService.signInWithGoogle(credential);
 
       if (userCredential != null && userCredential.user != null) {
         // Navigate to BottomNavBar instead of directly to HomePage
@@ -77,7 +80,7 @@ class _SignInCardState extends State<SignInCard> {
       }
 
       // generate jwt proof
-      final idToken = googleAuth.idToken;
+      // final idToken = googleAuth.idToken;
       final header = parseJwtHeader(idToken);
       final payload = parseJwtPayload(idToken);
       final googlePublicKey = await fetchGooglePublicKey(header['kid']);
@@ -93,7 +96,7 @@ class _SignInCardState extends State<SignInCard> {
       final privateKey =
           "39919031573819484966641096195810516976016707561507350566056652693882791321787";
       final publicKey =
-          "17302102366996071265028731047581517700208166805377449770193522591062772282670";
+          "2162762795874508908128591380947689712526020850672181221274190323882846535333";
       final salt =
           "646645587996092179008704451306999156519169540151959619716525865713892520";
       final proofArgs = {"keyId": header['kid'], "jwtCircuitVersion": "0.3.1"};

@@ -1,6 +1,13 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'fetch_googleJWTpubKey.dart';
 import 'google_jwt_prover.dart';
@@ -49,6 +56,69 @@ class AuthService {
     return email.substring(email.indexOf('@') + 1);
   }
 
+  String generateState() {
+    final random = Random.secure();
+    final number = random.nextDouble(); // Equivalent to Math.random()
+    final base36 = number.toString().substring(2, 15); // Drop '0.'
+    return base36;
+  }
+
+  Future<String> signInManually(String nonce) async {
+    final state = generateState();
+    // App specific variables
+    final googleClientId =
+        '194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com';
+    final callbackUrlScheme =
+        'com.googleusercontent.apps.194338782167-745t4ocob6cprhno894c59l3a9lgifgm';
+
+    final authUrl = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
+      'client_id': googleClientId,
+      'redirect_uri': '$callbackUrlScheme:/',
+      'response_type': 'code',
+      'scope': "openid email",
+      'state': state,
+      'nonce': nonce,
+    });
+
+    final result = await FlutterWebAuth2.authenticate(
+      url: authUrl.toString(),
+      callbackUrlScheme: callbackUrlScheme,
+    );
+
+    // Extract code from resulting url
+    final code = Uri.parse(result).queryParameters['code'];
+
+    // Construct an Uri to Google's oauth2 endpoint
+    final url = Uri.https('www.googleapis.com', 'oauth2/v4/token');
+
+    // Use this code to get an access token
+    final response = await http.post(
+      url,
+      body: {
+        'client_id': googleClientId,
+        'redirect_uri': '$callbackUrlScheme:/',
+        'grant_type': 'authorization_code',
+        'code': code,
+      },
+    );
+
+    final tokenData = json.decode(response.body);
+    print('tokenData: $tokenData');
+    final idToken = tokenData['id_token'];
+
+    if (idToken == null) {
+      throw Exception("id_token not found in redirect");
+    }
+    return idToken;
+
+    // ✅ Optionally verify nonce/state here if you decode the token
+
+    // Use FirebaseAuth if needed
+    // final credential = GoogleAuthProvider.credential(idToken: idToken);
+    // await FirebaseAuth.instance.signInWithCredential(credential);
+    // return idToken;
+  }
+
   Future<GoogleSignInAuthentication> getGoogleAuth() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -66,7 +136,8 @@ class AuthService {
   }
 
   Future<OAuthCredential?> getGoogleCredential(
-      GoogleSignInAuthentication googleAuth) async {
+    GoogleSignInAuthentication googleAuth,
+  ) async {
     try {
       return GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
