@@ -1,8 +1,16 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'fetch_googleJWTpubKey.dart';
+import 'google_jwt_prover.dart';
 
 Map<String, dynamic> parseJwtHeader(String? idToken) {
   if (idToken == null) {
@@ -44,34 +52,139 @@ class AuthService {
   // Stream of auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Sign in with Google
-  Future<UserCredential?> signInWithGoogle() async {
+  String sliceEmail(dynamic email) {
+    return email.substring(email.indexOf('@') + 1);
+  }
+
+  String generateState() {
+    final random = Random.secure();
+    final number = random.nextDouble(); // Equivalent to Math.random()
+    final base36 = number.toString().substring(2, 15); // Drop '0.'
+    return base36;
+  }
+
+  Future<String> signInManually(String nonce) async {
+    final state = generateState();
+    // App specific variables
+    final googleClientId =
+        '194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com';
+    final callbackUrlScheme =
+        'com.googleusercontent.apps.194338782167-745t4ocob6cprhno894c59l3a9lgifgm';
+
+    final authUrl = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
+      'client_id': googleClientId,
+      'redirect_uri': '$callbackUrlScheme:/',
+      'response_type': 'code',
+      'scope': "openid email",
+      'state': state,
+      'nonce': nonce,
+    });
+
+    final result = await FlutterWebAuth2.authenticate(
+      url: authUrl.toString(),
+      callbackUrlScheme: callbackUrlScheme,
+    );
+
+    // Extract code from resulting url
+    final code = Uri.parse(result).queryParameters['code'];
+
+    // Construct an Uri to Google's oauth2 endpoint
+    final url = Uri.https('www.googleapis.com', 'oauth2/v4/token');
+
+    // Use this code to get an access token
+    final response = await http.post(
+      url,
+      body: {
+        'client_id': googleClientId,
+        'redirect_uri': '$callbackUrlScheme:/',
+        'grant_type': 'authorization_code',
+        'code': code,
+      },
+    );
+
+    final tokenData = json.decode(response.body);
+    print('tokenData: $tokenData');
+    final idToken = tokenData['id_token'];
+
+    if (idToken == null) {
+      throw Exception("id_token not found in redirect");
+    }
+    return idToken;
+
+    // ✅ Optionally verify nonce/state here if you decode the token
+
+    // Use FirebaseAuth if needed
+    // final credential = GoogleAuthProvider.credential(idToken: idToken);
+    // await FirebaseAuth.instance.signInWithCredential(credential);
+    // return idToken;
+  }
+
+  Future<GoogleSignInAuthentication> getGoogleAuth() async {
     try {
-      // Begin Google Sign-In process
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       // If user cancels the sign-in process
       if (googleUser == null) {
-        return null;
+        throw Exception('Google sign in failed');
       }
 
-      // Obtain auth details from the Google Sign-In
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      return await googleUser.authentication;
+    } catch (e) {
+      print('Error getting Google authentication: $e');
+      rethrow; // Rethrow to let the UI layer handle the error
+    }
+  }
 
-      // Create a credential from the Google Sign-In details
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+  Future<OAuthCredential?> getGoogleCredential(
+    GoogleSignInAuthentication googleAuth,
+  ) async {
+    try {
+      return GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+    } catch (e) {
+      print('Error getting Google credential: $e');
+      rethrow; // Rethrow to let the UI layer handle the error
+    }
+  }
 
-      final idToken = googleAuth.idToken;
-      final header = parseJwtHeader(idToken);
-      final payload = parseJwtPayload(idToken);
+  // Sign in with Google
+  Future<UserCredential?> signInWithGoogle(OAuthCredential? credential) async {
+    try {
+      if (credential == null) {
+        throw Exception('Google credential is null');
+      }
+      // // Begin Google Sign-In process
+      // final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-      final googlePublicKey = await fetchGooglePublicKey(header['kid']);
+      // // If user cancels the sign-in process
+      // if (googleUser == null) {
+      //   return null;
+      // }
+
+      // // Obtain auth details from the Google Sign-In
+      // final GoogleSignInAuthentication googleAuth =
+      //     await googleUser.authentication;
+
+      // // Create a credential from the Google Sign-In details
+      // final OAuthCredential credential = GoogleAuthProvider.credential(
+      //   accessToken: googleAuth.accessToken,
+      //   idToken: googleAuth.idToken,
+      // );
+
+      // final idToken = googleAuth.idToken;
+      // final header = parseJwtHeader(idToken);
+      // final payload = parseJwtPayload(idToken);
+
+      // final googlePublicKey = await fetchGooglePublicKey(header['kid']);
       // print('idToken: $idToken');
       // print('Google Public Key: $googlePublicKey');
+      // generateJwtProof(
+      //   googlePublicKey.toString(),
+      //   idToken,
+      //   sliceEmail(payload['email']),
+      // );
 
       // Sign in to Firebase with the Google credential
       return await _auth.signInWithCredential(credential);

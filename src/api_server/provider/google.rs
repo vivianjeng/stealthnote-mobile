@@ -1,9 +1,9 @@
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 
-use crate::proof::jwt_proof;
-
 use super::{AnonGroup, AnonGroupProvider, EphemeralKey};
+use crate::{proof::jwt_proof, prove_jwt};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GoogleOAuthProvider;
@@ -23,10 +23,13 @@ impl AnonGroupProvider for GoogleOAuthProvider {
      * @param ephemeralPubkeyHash - Hash of the ephemeral pubkey, expiry and salt
      * @returns Returns the AnonGroup and membership proof, along with additional args that may be needed for verification
      */
-    fn generate_proof(ephemeral_key: EphemeralKey) -> (String, AnonGroup, String) {
-        unimplemented!()
-        // const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
-        // jwt_proof::prove_jwt(srs_path, inputs)
+    fn generate_proof(
+        ephemeral_key: EphemeralKey,
+        inputs: HashMap<String, Vec<String>>,
+    ) -> Vec<u8> {
+        // const JWT_SRS: &str = "../../../public/jwt-srs.local";
+        // prove_jwt(JWT_SRS.to_string(), inputs)
+        vec![]
     }
 
     /**
@@ -38,15 +41,15 @@ impl AnonGroupProvider for GoogleOAuthProvider {
      * @returns Promise resolving to true if the proof is valid
      */
     fn verify_proof(
-        proof: String,
-        anon_group_id: u32,
+        proof: Vec<u8>,
+        anon_group_id: String,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: u32,
-        proof_args: String,
+        ephemeral_pubkey_expiry: String,
+        proof_args: HashMap<String, Vec<String>>,
     ) -> bool {
-        true
-        // const JWT_SRS: &str = include_str!("../../../public/jwt-srs.json");
+        // const JWT_SRS: &str = "../../../public/jwt-srs.local";
         // jwt_proof::verify_jwt(JWT_SRS.to_string(), proof)
+        true
     }
 
     /**

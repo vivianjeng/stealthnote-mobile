@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use ed25519::Signature;
 use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
@@ -19,11 +21,11 @@ pub enum Provider {
 impl Provider {
     pub fn verify_proof(
         &self,
-        proof: String,
-        anon_group_id: u32,
+        proof: Vec<u8>,
+        anon_group_id: String,
         ephemeral_pubkey: BigUint,
-        ephemeral_pubkey_expiry: u32,
-        proof_args: String,
+        ephemeral_pubkey_expiry: String,
+        proof_args: HashMap<String, Vec<String>>,
     ) -> bool {
         match self {
             Self::Google => GoogleOAuthProvider::verify_proof(
@@ -41,28 +43,34 @@ impl Provider {
 #[derive(uniffi::Record, Clone)]
 pub struct Member {
     pub provider: Provider,
-    pub pubkey: String,
-    pub pubkey_expiry: u32,
-    pub proof: String,
-    pub proof_args: String,
-    pub group_id: u32,
+    pub pubkey: String, // BigUint
+    pub pubkey_expiry: String,
+    pub proof: Vec<u8>,
+    pub proof_args: HashMap<String, Vec<String>>,
+    pub group_id: String,
 }
 
-// #[derive(Serialize, Deserialize, Clone)]
-pub struct SignedMessage {
-    pub message: Message,
-    pub signature: BigUint,
-    pub ephemeral_pubkey: BigUint,
-    pub ephemeral_pubkey_expiry: u32,
-}
-
-#[derive(uniffi::Record, Serialize, Deserialize, Clone)]
+#[derive(uniffi::Record, Serialize, Deserialize, Clone, Debug)]
 pub struct Message {
-    pub id: u32,
-    pub anon_group_id: u32,
-    pub anon_group_provider: Provider,
+    pub id: String,
+    pub anonGroupId: String,
+    pub anonGroupProvider: String,
     pub text: String,
-    pub timestamp: u32,
+    pub timestamp: String,
     pub internal: bool,
-    pub likes: Vec<String>, // list of pub_key
+    pub likes: u32,
+}
+
+#[derive(uniffi::Record, Serialize, Deserialize, Clone, Debug)]
+pub struct SignedMessage {
+    pub id: String,
+    pub anonGroupId: String,
+    pub anonGroupProvider: String,
+    pub text: String,
+    pub timestamp: String,
+    pub internal: bool,
+    pub signature: String,
+    pub ephemeralPubkey: String,
+    pub ephemeralPubkeyExpiry: String,
+    pub likes: u32,
 }

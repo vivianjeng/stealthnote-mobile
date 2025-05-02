@@ -19,7 +19,7 @@ mod tests {
     use crate::api_server::{Member, Message, Provider, SignedMessage};
 
     use super::*;
-    use std::fs;
+    use std::{collections::HashMap, fs};
 
     fn cleanup() {
         let _ = fs::remove_file("members.json");
@@ -30,27 +30,25 @@ mod tests {
         Member {
             provider: Provider::Google,
             pubkey: pub_key.to_string(),
-            pubkey_expiry: 9999999,
-            proof: "".into(),
-            proof_args: "".into(),
-            group_id: 1,
+            pubkey_expiry: "2025-05-07T09:07:57.379Z".to_string(),
+            proof: vec![],
+            proof_args: HashMap::new(),
+            group_id: "pse.dev".to_string(),
         }
     }
 
     fn sample_message() -> SignedMessage {
         SignedMessage {
-            message: Message {
-                id: 1,
-                anon_group_id: 10,
-                anon_group_provider: Provider::Google,
-                text: "this is a test string".to_string(),
-                timestamp: Utc::now().timestamp() as u32,
-                internal: false,
-                likes: vec![],
-            },
-            signature: BigUint::from_str("fake signature").unwrap(),
-            ephemeral_pubkey: BigUint::from_str("ephemeral pubkey").unwrap(),
-            ephemeral_pubkey_expiry: Utc::now().timestamp() as u32 + 999999999,
+            id: "1".to_string(),
+            anonGroupId: "pse.dev".to_string(),
+            anonGroupProvider: "google-oauth".to_string(),
+            text: "this is a test string".to_string(),
+            timestamp: Utc::now().to_string(),
+            internal: false,
+            signature: "fake signature".to_string(),
+            ephemeralPubkey: "ephemeral pubkey".to_string(),
+            ephemeralPubkeyExpiry: Utc::now().to_string(),
+            likes: 0,
         }
     }
 
@@ -73,7 +71,7 @@ mod tests {
     //         1
     //     );
     //     let likes = FileApi::get_likes(1, "./".to_string()).unwrap();
-    //     assert_eq!(likes, vec![pub_key]);
+    //     assert_eq!(likes, 1);
 
     //     // Like again (no duplicate)
     //     assert_eq!(
@@ -81,7 +79,7 @@ mod tests {
     //         1
     //     );
     //     let likes = FileApi::get_likes(1, "./".to_string()).unwrap();
-    //     assert_eq!(likes, vec![pub_key]);
+    //     assert_eq!(likes, 1);
 
     //     // Unlike
     //     assert_eq!(
@@ -89,7 +87,7 @@ mod tests {
     //         0
     //     );
     //     let likes = FileApi::get_likes(1, "./".to_string()).unwrap();
-    //     assert!(likes.is_empty());
+    //     assert_eq!(likes, 0);
 
     //     // Unlike again (should not fail)
     //     assert_eq!(
@@ -97,7 +95,7 @@ mod tests {
     //         0
     //     );
     //     let likes = FileApi::get_likes(1, "./".to_string()).unwrap();
-    //     assert!(likes.is_empty());
+    //     assert_eq!(likes, 0);
 
     //     // cleanup();
     // }

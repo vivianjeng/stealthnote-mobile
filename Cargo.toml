@@ -23,6 +23,7 @@ num-bigint = "0.4"
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
 ed25519 = "2.2.3"
 ed25519-dalek = { version = "2.1.1", features = ["rand_core"] }
 rand = "0.8"

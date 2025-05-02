@@ -168,7 +168,7 @@ impl FileApi {
         Ok(messages)
     }
 
-    pub fn get_likes(msg_id: u32, path: String) -> Result<Vec<String>> {
+    pub fn get_likes(msg_id: u32, path: String) -> Result<u32> {
         let messages_dir = Path::new(&path).join("messages");
         if !messages_dir.exists() {
             bail!("can't find this message id");
@@ -221,13 +221,18 @@ impl FileApi {
         let mut msg_data = String::new();
         msg_file.read_to_string(&mut msg_data)?;
         let mut message = serde_json::from_str::<SignedMessage>(&msg_data)?;
-        let is_increase = increase && !message.message.likes.contains(&pub_key);
-        let is_decrease = !increase && message.message.likes.contains(&pub_key);
-        if is_increase {
-            message.message.likes.push(pub_key);
-        } else if is_decrease {
-            message.message.likes.retain(|x| x.ne(&pub_key));
-        }
+        // let is_increase = increase && !message.likes.contains(&pub_key);
+        // let is_decrease = !increase && message.likes.contains(&pub_key);
+        // if is_increase {
+        //     message.likes.push(pub_key);
+        // } else if is_decrease {
+        //     message.likes.retain(|x| x.ne(&pub_key));
+        // }
+        message.likes = if increase {
+            message.likes + 1
+        } else {
+            message.likes - 1
+        };
 
         // save back to the message file
         let serialized_message = serde_json::to_string_pretty(&message)?;
@@ -243,12 +248,17 @@ impl FileApi {
                 .get_mut(&msg_id)
                 .ok_or_else(|| format!("Message ID {} not found in index", msg_id))
                 .unwrap();
-            if is_increase {
-                entry.likes += 1;
-            } else if is_decrease {
-                entry.likes = entry.likes.saturating_sub(1);
-            }
+            entry.likes = if increase {
+                entry.likes + 1
+            } else {
+                entry.likes - 1
+            };
             entry.likes
+            //     } else if is_decrease {
+            //         entry.likes = entry.likes.saturating_sub(1);
+            //     }
+            //     entry.likes
+            // };
         };
         // save back to index.json
         let serialized_index = serde_json::to_string_pretty(&index_map)?;
@@ -277,28 +287,26 @@ mod tests {
     fn sample_member() -> Member {
         Member {
             pubkey: BigUint::from(12345u64).to_string(),
-            pubkey_expiry: 9999999,
+            pubkey_expiry: "2025-05-07T09:07:57.379Z".to_string(),
             provider: Provider::Google,
-            proof: "sample-proof".to_string(),
-            proof_args: "sample-args".to_string(),
-            group_id: 1,
+            proof: vec![],
+            proof_args: HashMap::new(),
+            group_id: "pse.dev".to_string(),
         }
     }
 
     fn sample_message() -> SignedMessage {
         SignedMessage {
-            message: Message {
-                id: 1,
-                anon_group_id: 10,
-                anon_group_provider: Provider::Google,
-                text: "this is a test string".to_string(),
-                timestamp: Utc::now().timestamp() as u32,
-                internal: false,
-                likes: vec![],
-            },
+            id: "1".to_string(),
+            anonGroupId: "pse.dev".to_string(),
+            anonGroupProvider: "google-oauth".to_string(),
+            text: "this is a test string".to_string(),
+            timestamp: Utc::now().to_string(),
+            internal: false,
             signature: "fake signature".to_string(),
-            ephemeral_pubkey: "ephemeral pubkey".to_string(),
-            ephemeral_pubkey_expiry: Utc::now().timestamp() as u32 + 999999999,
+            ephemeralPubkey: "ephemeral pubkey".to_string(),
+            ephemeralPubkeyExpiry: Utc::now().to_string(),
+            likes: 0,
         }
     }
 
@@ -327,7 +335,7 @@ mod tests {
         assert_eq!(latest_messages[0].message.text, message.message.text);
 
         // Test get_likes and update_likes
-        assert_eq!(FileApi::get_likes(1, "./".to_string()).unwrap().len(), 0);
+        assert_eq!(FileApi::get_likes(1, "./".to_string()).unwrap(), 0);
         // assert!(FileApi::update_likes(1, true, member.pubkey.clone(), "./".to_string()).unwrap());
         // assert_eq!(FileApi::get_likes(1, "./".to_string()).unwrap().len(), 1);
         // assert!(FileApi::update_likes(1, false, member.pubkey, "./".to_string()).unwrap());

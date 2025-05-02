@@ -41,6 +41,10 @@ PODS:
   - FirebaseCoreInternal (11.10.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
   - Flutter (1.0.0)
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - flutter_web_auth_2 (3.0.0):
+    - Flutter
   - google_sign_in_ios (0.0.1):
     - AppAuth (>= 1.7.4)
     - Flutter
@@ -93,6 +97,8 @@ PODS:
     - FlutterMacOS
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (101.0.0)
+  - uni_links (0.0.1):
+    - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -100,10 +106,13 @@ DEPENDENCIES:
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - mopro_flutter (from `.symlinks/plugins/mopro_flutter/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -131,6 +140,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  flutter_web_auth_2:
+    :path: ".symlinks/plugins/flutter_web_auth_2/ios"
   google_sign_in_ios:
     :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   integration_test:
@@ -139,6 +152,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/mopro_flutter/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  uni_links:
+    :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
@@ -155,6 +170,8 @@ SPEC CHECKSUMS:
   FirebaseCoreExtension: 6f357679327f3614e995dc7cf3f2d600bdc774ac
   FirebaseCoreInternal: ef4505d2afb1d0ebbc33162cb3795382904b5679
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  flutter_web_auth_2: 5c8d9dcd7848b5a9efb086d24e7a9adcae979c80
   google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9
   GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
@@ -165,6 +182,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  uni_links: ed8c961e47ed9ce42b6d91e1de8049e38a4b3152
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5

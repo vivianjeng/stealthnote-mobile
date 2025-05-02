@@ -23,6 +23,8 @@ pub fn create_membership(member: Member, path: String) -> Result<bool> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
     use crate::api_server::Provider;
 
@@ -34,10 +36,10 @@ mod tests {
         Member {
             provider: Provider::Google,
             pubkey: BigUint::from(12345u64).to_string(),
-            pubkey_expiry: 9999999,
-            proof: "dummy-proof".to_string(),
-            proof_args: "dummy-args".to_string(),
-            group_id: 1,
+            pubkey_expiry: "2025-05-07T09:07:57.379Z".to_string(),
+            proof: vec![],
+            proof_args: HashMap::new(),
+            group_id: "pse.dev".to_string(),
         }
     }
 

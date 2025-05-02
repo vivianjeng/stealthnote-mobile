@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<dynamic> fetchMessages() async {
-  final url = Uri.parse('https://stealthnote.xyz/api/messages?limit=5');
+  final url = Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages?limit=5');
 
   try {
     final response = await http.get(url);
@@ -30,7 +30,7 @@ Future<dynamic> fetchMessage(String id, bool isInternal) async {
   }
 
   final response = await http.get(
-    Uri.parse('https://stealthnote.xyz/api/messages/$id'),
+    Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages/$id'),
     headers: headers,
   );
 
