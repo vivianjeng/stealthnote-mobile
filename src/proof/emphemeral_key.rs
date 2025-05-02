@@ -1,6 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::api_server::{Message, SignedMessage};
+use acir::acir_field::FieldElement;
 use ark_bn254::Fr;
 use ark_ff::PrimeField;
 use chrono::{DateTime, Utc};
@@ -8,11 +9,13 @@ use ed25519::signature::SignerMut;
 use ed25519::Signature;
 use ed25519_dalek::Verifier;
 use ed25519_dalek::{SigningKey, VerifyingKey};
-use light_poseidon::{Poseidon, PoseidonHasher};
 use num_bigint::BigUint;
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 use sha256;
+use std::str::FromStr;
+
+use super::poseidon2::Poseidon2;
 
 #[derive(Clone, Debug)]
 pub struct EphemeralKey {
@@ -21,6 +24,14 @@ pub struct EphemeralKey {
     pub salt: BigUint,
     pub expiry: u32,
     pub ephemeral_pubkey_hash: BigUint,
+}
+
+fn bytes_to_biguint(bytes: &[u8]) -> BigUint {
+    let mut result = BigUint::from(0u8);
+    for &byte in bytes {
+        result = (result << 8) + BigUint::from(byte);
+    }
+    result
 }
 
 impl EphemeralKey {
@@ -36,20 +47,29 @@ impl EphemeralKey {
             .as_secs() as u32
             + 7 * 24 * 60 * 60; // 1 week from now
 
-        let mut poseidon = Poseidon::<Fr>::new_circom(3).unwrap();
+        let public_key_str = bytes_to_biguint(&verifying_key.to_bytes()).to_string();
+        let salt_str = bytes_to_biguint(&salt.to_bytes()).to_string();
+        let expiry_str = expiry.to_string();
+        let input1_field_element = FieldElement::try_from_str(&public_key_str).unwrap();
+        let input2_field_element = FieldElement::try_from_str(&salt_str).unwrap();
+        let input3_field_element = FieldElement::try_from_str(&expiry_str).unwrap();
 
-        let input1 = Fr::from_be_bytes_mod_order(&verifying_key.as_bytes()[..29]);
-        let input2 = Fr::from_be_bytes_mod_order(&salt.to_bytes());
-        let input3 = Fr::from(expiry);
-
-        let hash = poseidon.hash(&[input1, input2, input3]).unwrap();
+        let hash = Poseidon2::hash(
+            &[
+                input1_field_element,
+                input2_field_element,
+                input3_field_element,
+            ],
+            false,
+        );
+        println!("hash: {}", hash.to_string());
 
         EphemeralKey {
             private_key: signing_key,
             public_key: verifying_key,
-            salt: BigUint::from_bytes_be(&salt.to_bytes()[..30]),
-            expiry,
-            ephemeral_pubkey_hash: hash.into(),
+            salt: bytes_to_biguint(&salt.to_bytes()),
+            expiry: expiry,
+            ephemeral_pubkey_hash: BigUint::from_str(&hash.to_string()).unwrap(),
         }
     }
 
@@ -62,6 +82,26 @@ impl EphemeralKey {
             self.expiry,
             signature,
         )
+    }
+
+    pub fn get_ephemeral_private_key(&self) -> String {
+        bytes_to_biguint(&self.private_key.to_bytes()).to_string()
+    }
+
+    pub fn get_ephemeral_public_key(&self) -> String {
+        bytes_to_biguint(&self.public_key.to_bytes()).to_string()
+    }
+
+    pub fn get_ephemeral_salt(&self) -> String {
+        self.salt.to_string()
+    }
+
+    pub fn get_ephemeral_expiry(&self) -> String {
+        self.expiry.to_string()
+    }
+
+    pub fn get_ephemeral_pubkey_hash(&self) -> String {
+        self.ephemeral_pubkey_hash.to_string()
     }
 
     // pub fn verify_message_signature(&self, signed_message: SignedMessage) -> bool {
@@ -114,9 +154,23 @@ mod tests {
     use crate::api_server::{Message, Provider, SignedMessage};
 
     #[test]
+    fn test_poseidon2_hash() {
+        let input1 = FieldElement::try_from_str("0").unwrap();
+        let input2 = FieldElement::try_from_str("0").unwrap();
+        // let input3 = FieldElement::try_from_str("1746788980").unwrap();
+        let hash = Poseidon2::hash(&[input1, input2], false);
+        println!("hash: {}", hash.to_string());
+    }
+
+    #[test]
     fn test_ephemeral_key_generation() {
         let key = EphemeralKey::generate_ephemeral_key();
         assert_eq!(key.public_key.as_bytes().len(), 32);
+        println!("private key: {}", key.get_ephemeral_private_key());
+        println!("public key: {}", key.get_ephemeral_public_key());
+        println!("salt: {}", key.get_ephemeral_salt());
+        println!("expiry: {}", key.get_ephemeral_expiry());
+        println!("pubkey hash: {}", key.get_ephemeral_pubkey_hash());
         assert!(key.expiry > 0);
     }
 
