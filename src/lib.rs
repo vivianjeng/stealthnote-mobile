@@ -3,6 +3,7 @@
 mopro_ffi::app!();
 
 use api_server::Member;
+use chrono::{DateTime, Utc};
 use noir::{
     barretenberg::{
         prove::prove_ultra_honk,
@@ -12,8 +13,9 @@ use noir::{
     },
     witness::from_vec_str_to_witness_map,
 };
+use num_bigint::BigUint;
 use proof::jwt_proof::{generate_inputs, generate_jwt_proof, JsonWebKey, StorageBlock};
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 mod api_server;
 mod proof;
@@ -202,15 +204,27 @@ pub fn prove_jwt(
             .collect(),
     );
 
-    inputs.insert("ephemeral_pubkey".to_string(), vec![ephemeral_pubkey]);
+    let bignuint_public_key = BigUint::from_str(&ephemeral_pubkey).unwrap();
+    // Equivalent to JavaScript: publicKey >> 3n
+    let shifted_public_key = &bignuint_public_key >> 3u32;
+    inputs.insert(
+        "ephemeral_pubkey".to_string(),
+        vec![shifted_public_key.to_string()],
+    );
 
     inputs.insert(
         "ephemeral_pubkey_salt".to_string(),
         vec![ephemeral_salt.to_string()],
     );
+
+    // Example: parse an ISO8601 datetime string
+    let expiry: DateTime<Utc> = ephemeral_expiry.parse().unwrap();
+
+    // Get UNIX timestamp in seconds (already floored)
+    let timestamp_secs = expiry.timestamp();
     inputs.insert(
         "ephemeral_pubkey_expiry".to_string(),
-        vec![ephemeral_expiry.to_string()],
+        vec![timestamp_secs.to_string()],
     );
 
     let field = encode_domain_field(domain.as_str(), 64);
@@ -283,6 +297,12 @@ mod tests {
         let srs_path = "public/jwt-srs.local".to_string();
         let id_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjA3YjgwYTM2NTQyODUyNWY4YmY3Y2QwODQ2ZDc0YThlZTRlZjM2MjUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIxMDA2NzAxMjkzNzQ4LTFpcm1ndTkxMHAybjd2am1vYTQ0MXJhbW02ZGNydmViLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiMTAwNjcwMTI5Mzc0OC0xaXJtZ3U5MTBwMm43dmptb2E0NDFyYW1tNmRjcnZlYi5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwODUyMjA3NzcyMTgyNjQzOTM2NCIsImhkIjoicHNlLmRldiIsImVtYWlsIjoidml2aWFuamVuZ0Bwc2UuZGV2IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbmNlIjoiNjIyNjE4NzE4OTI2NDIwNDg2NDk4MTI3MDAxMDcxODU2NTA0MzIyNDkyNjUwNjU2MjgzOTM2NTk2NDc3ODY5OTY1NDU5ODg3NTQ2IiwibmJmIjoxNzQ2MDAzNzgwLCJpYXQiOjE3NDYwMDQwODAsImV4cCI6MTc0NjAwNzY4MCwianRpIjoiZmZhNGNhMWQ1NDZlZGZlOWI1Mjc0NDY3ZTE5ODJhOTgyMTU5MjRkOSJ9.naERF4rIB5L3a6I3FBC--_b25O2P6zbymSKkXHgOy44PvZU1LLSQ5ORzxHT93YIpbSzx5eF_FAMuXeN9uwLPrpFRw5Zlt9RlrbfQVNHZj1izHxj0IEYBudGESMRKjef7vfvtsYm_s_iHwE5M6H9UATi9xJw4U34iVn664xZFxhtdqbvCXW-YrjNliNK7dSEKAdHgi4MxiASlHXishGVwmFwe116c3HfEcyAJMxv9pGZEhmh4IZ7jVuwiUFEjroZ7svpGLiNx1grEnqGCJa8gcHEI4t1Lpip9d9CMuEctudLiH0Bk_bFofV-s-VvEOdFfEW8WYdE_YhKS0G9qYnevlQ";
 
+        let emphemeral_pubkey =
+            "17302102366996071265028731047581517700208166805377449770193522591062772282670";
+        let emphemeral_salt =
+            "646645587996092179008704451306999156519169540151959619716525865713892520";
+        let emphemeral_expiry = "2025-05-07T09:07:57.379Z";
+
         let pubkey = JsonWebKey {
             kid: "07b80a365428525f8bf7cd0846d74a8ee4ef3625".to_string(),
             n: "03Cww27F2O7JxB5Ji9iT9szfKZ4MK-iPzVpQkdLjCuGKfpjaCVAz9zIQ0-7gbZ-8cJRaSLfByWTGMIHRYiX2efdjz1Z9jck0DK9W3mapFrBPvM7AlRni4lPlwUigDd8zxAMDCheqyK3vCOLFW-1xYHt_YGwv8b0dP7rjujarEYlWjeppO_QMNtXdKdT9eZtBEcj_9ms9W0aLdCFNR5AAR3y0kLkKR1H4DW7vncB46rqCJLenhlCbcW0MZ3asqcjqBQ2t9QMRnY83Zf_pNEsCcXlKp4uOQqEvzjAc9ZSr2sOmd_ESZ_3jMlNkCZ4J41TuG-My5illFcW5LajSKvxD3w".to_string(),
@@ -298,10 +318,9 @@ mod tests {
         let pubkey_str = serde_json::to_string(&pubkey).unwrap();
         let proof = prove_jwt(
             srs_path.clone(),
-            "2162762795874508908128591380947689712526020850672181221274190323882846535333"
-                .to_string(),
-            "646645587996092179008704451306999156519169540151959619716525865713892520".to_string(),
-            "1746608877".to_string(),
+            emphemeral_pubkey.to_string(),
+            emphemeral_salt.to_string(),
+            emphemeral_expiry.to_string(),
             id_token.to_string(),
             pubkey_str,
             domain,

@@ -1,6 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
+
+Uint8List extractProof(Uint8List result, int publicInputsLen) {
+  final offset = 4 + publicInputsLen;
+  return result.sublist(offset);
+}
+
 Future<void> createMembership(
   String ephemeralPubkey,
   String ephemeralPubkeyExpiry,
@@ -10,8 +16,11 @@ Future<void> createMembership(
   Map<String, dynamic> proofArgs,
 ) async {
   final url = Uri.parse(
-    'https://stealthnote-pi.vercel.app/api/memberships',
+    'https://ac1f-125-229-173-139.ngrok-free.app/api/memberships',
   ); // replace with your server
+
+  final publicInputsLen = 2720;
+  Uint8List rawProof = extractProof(proof, publicInputsLen);
 
   final response = await http.post(
     url,
@@ -21,7 +30,7 @@ Future<void> createMembership(
       'ephemeralPubkeyExpiry': ephemeralPubkeyExpiry,
       'groupId': groupId,
       'provider': provider,
-      'proof': proof, // Make sure this is a List<int> or List<String>
+      'proof': rawProof, // Make sure this is a List<int> or List<String>
       'proofArgs': proofArgs, // Map<String, dynamic>
     }),
   );

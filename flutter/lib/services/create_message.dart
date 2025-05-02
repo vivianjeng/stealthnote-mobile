@@ -34,7 +34,7 @@ Future<void> createMessage(
 
     // Send the signed message to the API
     final response = await http.post(
-      Uri.parse('https://stealthnote-pi.vercel.app/api/messages'),
+      Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages'),
       headers: {'Content-Type': 'application/json'},
       body: signedMessage,
     );

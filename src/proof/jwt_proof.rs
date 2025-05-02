@@ -396,6 +396,11 @@ fn prepare_public_inputs(
     public_inputs
 }
 
+fn extract_proof(result: &[u8], public_inputs_len: usize) -> &[u8] {
+    let offset = 4 + public_inputs_len;
+    &result[offset..]
+}
+
 pub fn verify_jwt_proof(
     srs_path: String,
     proof: Vec<u8>,
