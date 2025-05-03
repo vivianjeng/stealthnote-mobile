@@ -95,6 +95,12 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                   result.success(signedMessage)
                 }
               }
+              "generateEphemeralKey" -> {
+                val ephemeralKey = generateEphemeralKey()
+                launch(Dispatchers.Main) {
+                  result.success(ephemeralKey)
+                }
+              }
               else -> {
                 launch(Dispatchers.Main) {
                   result.notImplemented()

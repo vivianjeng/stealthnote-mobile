@@ -768,6 +768,8 @@ internal interface IntegrityCheckingUniffiLib : Library {
 
     fun uniffi_mopro_bindings_checksum_func_generate_circom_proof(): Short
 
+    fun uniffi_mopro_bindings_checksum_func_generate_ephemeral_key(): Short
+
     fun uniffi_mopro_bindings_checksum_func_generate_halo2_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_generate_noir_proof(): Short
@@ -846,6 +848,8 @@ internal interface UniffiLib : Library {
         `proofLib`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): RustBuffer.ByValue
+
+    fun uniffi_mopro_bindings_fn_func_generate_ephemeral_key(uniffi_out_err: UniffiRustCallStatus): RustBuffer.ByValue
 
     fun uniffi_mopro_bindings_fn_func_generate_halo2_proof(
         `srsPath`: RustBuffer.ByValue,
@@ -1168,6 +1172,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_generate_circom_proof() != 1382.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mopro_bindings_checksum_func_generate_ephemeral_key() != 55036.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_generate_halo2_proof() != 28088.toShort()) {
@@ -2095,6 +2102,15 @@ fun `generateCircomProof`(
                 FfiConverterString.lower(`zkeyPath`),
                 FfiConverterString.lower(`circuitInputs`),
                 FfiConverterTypeProofLib.lower(`proofLib`),
+                _status,
+            )
+        },
+    )
+
+fun `generateEphemeralKey`(): kotlin.String =
+    FfiConverterString.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_generate_ephemeral_key(
                 _status,
             )
         },

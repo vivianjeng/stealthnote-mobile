@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/signed_message.dart';
+import './generate_ephemeral_key.dart';
 import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
 
@@ -11,15 +12,14 @@ Future<void> createMessage(
   bool internal,
 ) async {
   final moproFlutterPlugin = MoproFlutter();
-  final ephemeralPubkeyHash =
-      "622618718926420486498127001071856504322492650656283936596477869965459887546";
-  final expiry = "2025-05-07T09:07:57.379Z";
-  final privateKey =
-      "39919031573819484966641096195810516976016707561507350566056652693882791321787";
-  final publicKey =
-      "17302102366996071265028731047581517700208166805377449770193522591062772282670";
-  final salt =
-      "646645587996092179008704451306999156519169540151959619716525865713892520";
+  final ephemeralKey = await getEphemeralKey();
+  print('ephemeralKey: $ephemeralKey');
+
+  // Decode the JSON string
+  Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
+  final ephemeral_pubkey = ephemeral_key_obj['public_key'];
+  final ephemeral_expiry = ephemeral_key_obj['expiry'];
+  final ephemeral_private_key = ephemeral_key_obj['private_key'];
   print('content: $content');
 
   try {
@@ -27,9 +27,9 @@ Future<void> createMessage(
       anonGroupId,
       content,
       internal,
-      publicKey,
-      privateKey,
-      expiry,
+      ephemeral_pubkey,
+      ephemeral_private_key,
+      ephemeral_expiry,
     );
 
     // Send the signed message to the API

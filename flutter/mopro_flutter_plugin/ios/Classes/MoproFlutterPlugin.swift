@@ -50,7 +50,10 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
           let jwt = args["jwt"] as? String,
           let domain = args["domain"] as? String
         else {
-          dispatchError("INVALID_ARGUMENTS", "srsPath, ephemeralPublicKey, ephemeralSalt, ephemeralExpiry, tokenId, jwt, domain are null or invalid format", nil)
+          dispatchError(
+            "INVALID_ARGUMENTS",
+            "srsPath, ephemeralPublicKey, ephemeralSalt, ephemeralExpiry, tokenId, jwt, domain are null or invalid format",
+            nil)
           return
         }
         do {
@@ -121,6 +124,15 @@ public class MoproFlutterPlugin: NSObject, FlutterPlugin {
           dispatchResult(signedMessage)
         } catch {
           dispatchError("SIGN_MESSAGE_ERROR", "Error signing message", error.localizedDescription)
+        }
+      case "generateEphemeralKey":
+        do {
+          let ephemeralKey = generateEphemeralKey()
+          dispatchResult(ephemeralKey)
+        } catch {
+          dispatchError(
+            "GENERATE_EPHEMERAL_KEY_ERROR", "Error generating ephemeral key",
+            error.localizedDescription)
         }
       default:
         dispatchResult(FlutterMethodNotImplemented)

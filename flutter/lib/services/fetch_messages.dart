@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import './generate_ephemeral_key.dart';
 
 Future<dynamic> fetchMessages() async {
-  final url = Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages?limit=5');
+  final url = Uri.parse(
+    'https://ac1f-125-229-173-139.ngrok-free.app/api/messages?limit=5',
+  );
 
   try {
     final response = await http.get(url);
@@ -22,7 +25,7 @@ Future<dynamic> fetchMessage(String id, bool isInternal) async {
   final headers = <String, String>{'Content-Type': 'application/json'};
 
   if (isInternal) {
-    final pubkey = getEphemeralPubkey();
+    final pubkey = getEphemeralKey();
     if (pubkey == null) {
       throw Exception('No public key found');
     }
@@ -40,10 +43,4 @@ Future<dynamic> fetchMessage(String id, bool isInternal) async {
 
   final message = jsonDecode(response.body);
   return message;
-}
-
-// Dummy method placeholder
-String? getEphemeralPubkey() {
-  // Replace with your actual logic
-  return 'example_pubkey';
 }

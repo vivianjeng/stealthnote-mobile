@@ -6,11 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../firebase_options.dart';
 import '../services/auth_service.dart';
 import '../services/create_membershipt.dart';
 import '../services/create_message.dart';
 import '../services/fetch_googleJWTpubKey.dart';
+import '../services/generate_ephemeral_key.dart';
 import '../services/google_jwt_prover.dart';
 import '../services/jwt_prover.dart';
 
@@ -42,16 +44,21 @@ class _SignInCardState extends State<SignInCard> {
     }
 
     try {
-      // Use the AuthService to handle Google Sign-In
-      // final GoogleSignInAuthentication googleAuth =
-      //     await _authService.getGoogleAuth();
-      // final OAuthCredential? credential = await _authService
-      //     .getGoogleCredential(googleAuth);
-      // final UserCredential? userCredential = await _authService
-      //     .signInWithGoogle(credential);
-      final String? idToken = await _authService.signInManually("622618718926420486498127001071856504322492650656283936596477869965459887546");
+      final ephemeralKey = await getEphemeralKey();
+      print('ephemeralKey: $ephemeralKey');
+
+      // Decode the JSON string
+      Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
+      final ephemeral_pubkey = ephemeral_key_obj['public_key'];
+      final ephemeral_expiry = ephemeral_key_obj['expiry'];
+      final ephemeral_pubkey_hash = ephemeral_key_obj['pubkey_hash'];
+
+      final String? idToken = await _authService.signInManually(
+        ephemeral_pubkey_hash,
+      );
       final credential = GoogleAuthProvider.credential(idToken: idToken);
-      final UserCredential? userCredential = await _authService.signInWithGoogle(credential);
+      final UserCredential? userCredential = await _authService
+          .signInWithGoogle(credential);
 
       if (userCredential != null && userCredential.user != null) {
         // Navigate to BottomNavBar instead of directly to HomePage
@@ -92,17 +99,10 @@ class _SignInCardState extends State<SignInCard> {
       );
 
       // create membership
-      final expiry = "2025-05-07T09:07:57.379Z";
-      final privateKey =
-          "39919031573819484966641096195810516976016707561507350566056652693882791321787";
-      final publicKey =
-          "17302102366996071265028731047581517700208166805377449770193522591062772282670";
-      final salt =
-          "646645587996092179008704451306999156519169540151959619716525865713892520";
       final proofArgs = {"keyId": header['kid'], "jwtCircuitVersion": "0.3.1"};
       await createMembership(
-        publicKey,
-        expiry,
+        ephemeral_pubkey,
+        ephemeral_expiry,
         sliceEmail(payload['email']),
         "google-oauth",
         proof!,

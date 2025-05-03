@@ -1794,18 +1794,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d750af042f7ef4f724306de029d18836c26c1765a54a6a3f094cbd23a7267ffa"
 
 [[package]]
-name = "light-poseidon"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39e3d87542063daaccbfecd78b60f988079b6ec4e089249658b9455075c78d42"
-dependencies = [
- "ark-bn254",
- "ark-ff",
- "num-bigint",
- "thiserror 1.0.69",
-]
-
-[[package]]
 name = "linux-raw-sys"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1910,16 +1898,17 @@ dependencies = [
 name = "mopro-zkemail-nr"
 version = "0.1.0"
 dependencies = [
+ "acir",
  "anyhow",
  "ark-bn254",
  "ark-ff",
  "base64 0.22.1",
+ "bn254_blackbox_solver",
  "byteorder",
  "chrono",
  "ed25519",
  "ed25519-dalek",
  "hex",
- "light-poseidon",
  "mopro-ffi",
  "noir",
  "num-bigint",
