@@ -5,6 +5,8 @@ import '../models/signed_message.dart';
 import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
 
+import 'generate_ephemeral_key.dart';
+
 Future<Uint8List?> generateJwtProof(
   String jwt,
   String? idToken,
@@ -16,22 +18,21 @@ Future<Uint8List?> generateJwtProof(
   final moproFlutterPlugin = MoproFlutter();
   const srsAssetPath = 'assets/jwt-srs.local';
   final srsPath = await moproFlutterPlugin.copyAssetToFileSystem(srsAssetPath);
-  final ephemeralPubkeyHash =
-      "622618718926420486498127001071856504322492650656283936596477869965459887546";
-  final expiry = "2025-05-07T09:07:57.379Z";
-  final privateKey =
-      "39919031573819484966641096195810516976016707561507350566056652693882791321787";
-  final publicKey =
-      "17302102366996071265028731047581517700208166805377449770193522591062772282670";
-  final salt =
-      "646645587996092179008704451306999156519169540151959619716525865713892520";
+  final ephemeralKey = await getEphemeralKey();
+  print('ephemeralKey: $ephemeralKey');
+
+  // Decode the JSON string
+  Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
+  final ephemeral_pubkey = ephemeral_key_obj['public_key'];
+  final ephemeral_salt = ephemeral_key_obj['salt'];
+  final ephemeral_expiry = ephemeral_key_obj['expiry'];
 
   try {
     final proof = await moproFlutterPlugin.proveJwt(
       srsPath,
-      publicKey,
-      salt,
-      expiry,
+      ephemeral_pubkey,
+      ephemeral_salt,
+      ephemeral_expiry,
       idToken,
       jwt,
       domain,

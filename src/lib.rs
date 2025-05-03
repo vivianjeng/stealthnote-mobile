@@ -14,6 +14,7 @@ use noir::{
     witness::from_vec_str_to_witness_map,
 };
 use num_bigint::BigUint;
+use proof::ephemeral_key::EphemeralKey;
 use proof::jwt_proof::{generate_inputs, generate_jwt_proof, JsonWebKey, StorageBlock};
 use std::{collections::HashMap, str::FromStr};
 
@@ -269,6 +270,28 @@ fn verify_jwt_proof(
     )
 }
 
+#[uniffi::export]
+pub fn generate_ephemeral_key() -> String {
+    let ephemeral_key = EphemeralKey::generate_ephemeral_key().unwrap();
+    let json_obj = HashMap::from([
+        (
+            "private_key".to_string(),
+            ephemeral_key.get_ephemeral_private_key(),
+        ),
+        (
+            "public_key".to_string(),
+            ephemeral_key.get_ephemeral_public_key(),
+        ),
+        ("salt".to_string(), ephemeral_key.get_ephemeral_salt()),
+        ("expiry".to_string(), ephemeral_key.get_ephemeral_expiry()),
+        (
+            "pubkey_hash".to_string(),
+            ephemeral_key.get_ephemeral_pubkey_hash(),
+        ),
+    ]);
+    serde_json::to_string(&json_obj).unwrap()
+}
+
 //
 // API
 //
@@ -293,15 +316,22 @@ mod tests {
 
     #[test]
     #[serial_test::serial]
+    fn test_generate_ephemeral_key() {
+        let ephemeral_key = generate_ephemeral_key();
+        println!("ephemeral_key: {}", ephemeral_key);
+    }
+
+    #[test]
+    #[serial_test::serial]
     fn test_prove_jwt_with_real_data() {
         let srs_path = "public/jwt-srs.local".to_string();
         let id_token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjA3YjgwYTM2NTQyODUyNWY4YmY3Y2QwODQ2ZDc0YThlZTRlZjM2MjUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIxMDA2NzAxMjkzNzQ4LTFpcm1ndTkxMHAybjd2am1vYTQ0MXJhbW02ZGNydmViLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiMTAwNjcwMTI5Mzc0OC0xaXJtZ3U5MTBwMm43dmptb2E0NDFyYW1tNmRjcnZlYi5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwODUyMjA3NzcyMTgyNjQzOTM2NCIsImhkIjoicHNlLmRldiIsImVtYWlsIjoidml2aWFuamVuZ0Bwc2UuZGV2IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5vbmNlIjoiNjIyNjE4NzE4OTI2NDIwNDg2NDk4MTI3MDAxMDcxODU2NTA0MzIyNDkyNjUwNjU2MjgzOTM2NTk2NDc3ODY5OTY1NDU5ODg3NTQ2IiwibmJmIjoxNzQ2MDAzNzgwLCJpYXQiOjE3NDYwMDQwODAsImV4cCI6MTc0NjAwNzY4MCwianRpIjoiZmZhNGNhMWQ1NDZlZGZlOWI1Mjc0NDY3ZTE5ODJhOTgyMTU5MjRkOSJ9.naERF4rIB5L3a6I3FBC--_b25O2P6zbymSKkXHgOy44PvZU1LLSQ5ORzxHT93YIpbSzx5eF_FAMuXeN9uwLPrpFRw5Zlt9RlrbfQVNHZj1izHxj0IEYBudGESMRKjef7vfvtsYm_s_iHwE5M6H9UATi9xJw4U34iVn664xZFxhtdqbvCXW-YrjNliNK7dSEKAdHgi4MxiASlHXishGVwmFwe116c3HfEcyAJMxv9pGZEhmh4IZ7jVuwiUFEjroZ7svpGLiNx1grEnqGCJa8gcHEI4t1Lpip9d9CMuEctudLiH0Bk_bFofV-s-VvEOdFfEW8WYdE_YhKS0G9qYnevlQ";
 
-        let emphemeral_pubkey =
+        let ephemeral_pubkey =
             "17302102366996071265028731047581517700208166805377449770193522591062772282670";
-        let emphemeral_salt =
+        let ephemeral_salt =
             "646645587996092179008704451306999156519169540151959619716525865713892520";
-        let emphemeral_expiry = "2025-05-07T09:07:57.379Z";
+        let ephemeral_expiry = "2025-05-07T09:07:57.379Z";
 
         let pubkey = JsonWebKey {
             kid: "07b80a365428525f8bf7cd0846d74a8ee4ef3625".to_string(),
@@ -318,9 +348,9 @@ mod tests {
         let pubkey_str = serde_json::to_string(&pubkey).unwrap();
         let proof = prove_jwt(
             srs_path.clone(),
-            emphemeral_pubkey.to_string(),
-            emphemeral_salt.to_string(),
-            emphemeral_expiry.to_string(),
+            ephemeral_pubkey.to_string(),
+            ephemeral_salt.to_string(),
+            ephemeral_expiry.to_string(),
             id_token.to_string(),
             pubkey_str,
             domain,

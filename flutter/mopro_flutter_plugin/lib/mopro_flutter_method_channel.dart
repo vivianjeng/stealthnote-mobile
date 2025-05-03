@@ -30,10 +30,16 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
     String domain,
   ) async {
     try {
-      final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
-        'proveJwt',
-        {'srsPath': srsPath, 'ephemeralPublicKey': ephemeralPublicKey, 'ephemeralSalt': ephemeralSalt, 'ephemeralExpiry': ephemeralExpiry, 'tokenId': tokenId, 'jwt': jwt, 'domain': domain},
-      );
+      final Map<dynamic, dynamic>? result = await methodChannel
+          .invokeMethod('proveJwt', {
+            'srsPath': srsPath,
+            'ephemeralPublicKey': ephemeralPublicKey,
+            'ephemeralSalt': ephemeralSalt,
+            'ephemeralExpiry': ephemeralExpiry,
+            'tokenId': tokenId,
+            'jwt': jwt,
+            'domain': domain,
+          });
       if (result == null) {
         return ProveJwtResult(error: 'Native method returned null');
       }
@@ -87,10 +93,14 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
     String ephemeralPubkeyExpiry,
   ) async {
     try {
-      final result = await methodChannel.invokeMethod<String>(
-        'signMessage',
-        {'anonGroupId': anonGroupId, 'text': text, 'internal': internal, 'ephemeralPublicKey': ephemeralPublicKey, 'ephemeralPrivateKey': ephemeralPrivateKey, 'ephemeralPubkeyExpiry': ephemeralPubkeyExpiry},
-      );
+      final result = await methodChannel.invokeMethod<String>('signMessage', {
+        'anonGroupId': anonGroupId,
+        'text': text,
+        'internal': internal,
+        'ephemeralPublicKey': ephemeralPublicKey,
+        'ephemeralPrivateKey': ephemeralPrivateKey,
+        'ephemeralPubkeyExpiry': ephemeralPubkeyExpiry,
+      });
       if (result == null) {
         return 'Native method returned null';
       }
@@ -98,5 +108,24 @@ class MethodChannelMoproFlutter extends MoproFlutterPlatform {
     } on PlatformException catch (e) {
       return "Failed to sign message: '${e.message}'.";
     }
+  }
+
+  @override
+  Future<String> generateEphemeralKey() async {
+    final attempts = 10;
+    for (var i = 0; i < attempts;) {
+      try {
+        final result = await methodChannel.invokeMethod<String>(
+          'generateEphemeralKey',
+        );
+        if (result == null) {
+          return 'Native method returned null';
+        }
+        return result;
+      } on PlatformException catch (e) {
+        return "Failed to generate ephemeral key: '${e.message}'.";
+      }
+    }
+    return "Failed to generate ephemeral key after $attempts attempts.";
   }
 }

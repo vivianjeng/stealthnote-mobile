@@ -209,4 +209,9 @@ class MoproFlutter {
       ephemeralPubkeyExpiry,
     );
   }
+
+  /// Generates an ephemeral key using the platform channel.
+  Future<String> generateEphemeralKey() {
+    return MoproFlutterPlatform.instance.generateEphemeralKey();
+  }
 }

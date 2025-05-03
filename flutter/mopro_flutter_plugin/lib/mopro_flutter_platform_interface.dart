@@ -14,7 +14,10 @@ class ProveJwtResult {
   /// Creates a result object from a map, typically returned by the method channel.
   factory ProveJwtResult.fromMap(Map<dynamic, dynamic> map) {
     return ProveJwtResult(
-      proof: map['proof'] != null ? Uint8List.fromList(List<int>.from(map['proof'])) : null,
+      proof:
+          map['proof'] != null
+              ? Uint8List.fromList(List<int>.from(map['proof']))
+              : null,
       error: map['error'],
     );
   }
@@ -32,7 +35,6 @@ class VerifyJwtProofResult {
       error: map['error'],
     );
   }
-  
 }
 
 abstract class MoproFlutterPlatform extends PlatformInterface {
@@ -61,7 +63,9 @@ abstract class MoproFlutterPlatform extends PlatformInterface {
   }
 
   Future<String> getApplicationDocumentsDirectory() {
-    throw UnimplementedError('getApplicationDocumentsDirectory() has not been implemented.');
+    throw UnimplementedError(
+      'getApplicationDocumentsDirectory() has not been implemented.',
+    );
   }
 
   /// Generates a zkEmail proof.
@@ -69,16 +73,43 @@ abstract class MoproFlutterPlatform extends PlatformInterface {
   /// Takes the path to the Serialized Rekeying Set (SRS) file and the inputs map.
   /// The inputs map structure should match the one expected by the native mopro library,
   /// derived from the zkemail_input.json structure.
-  Future<ProveJwtResult> proveJwt(String srsPath, String ephemeralPublicKey, String ephemeralSalt, String ephemeralExpiry, String tokenId, String jwt, String domain) {
+  Future<ProveJwtResult> proveJwt(
+    String srsPath,
+    String ephemeralPublicKey,
+    String ephemeralSalt,
+    String ephemeralExpiry,
+    String tokenId,
+    String jwt,
+    String domain,
+  ) {
     throw UnimplementedError('proveJwt() has not been implemented.');
   }
 
-
-  Future<VerifyJwtProofResult> verifyJwtProof(String srsPath, Uint8List proof, String domain, String googleJwtPubkeyModulus, String ephemeralPubkey, String ephemeralPubkeyExpiry) {
+  Future<VerifyJwtProofResult> verifyJwtProof(
+    String srsPath,
+    Uint8List proof,
+    String domain,
+    String googleJwtPubkeyModulus,
+    String ephemeralPubkey,
+    String ephemeralPubkeyExpiry,
+  ) {
     throw UnimplementedError('verifyJwtProof() has not been implemented.');
   }
 
-  Future<String> signMessage(String anonGroupId, String text, bool internal, String ephemeralPublicKey, String ephemeralPrivateKey, String ephemeralPubkeyExpiry) {
+  Future<String> signMessage(
+    String anonGroupId,
+    String text,
+    bool internal,
+    String ephemeralPublicKey,
+    String ephemeralPrivateKey,
+    String ephemeralPubkeyExpiry,
+  ) {
     throw UnimplementedError('signMessage() has not been implemented.');
+  }
+
+  Future<String> generateEphemeralKey() {
+    throw UnimplementedError(
+      'generateEphemeralKey() has not been implemented.',
+    );
   }
 }
