@@ -7,7 +7,6 @@ Future<bool> toggleLike(String messageId, bool like) async {
   try {
     // Replace with your actual pubkey getter
     final ephemeralKey = await getEphemeralKey();
-    print('ephemeralKey: $ephemeralKey');
 
     // Decode the JSON string
     Map<String, dynamic> ephemeralKeyObj = jsonDecode(ephemeralKey);

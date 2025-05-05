@@ -13,7 +13,6 @@ Future<void> createMessage(
 ) async {
   final moproFlutterPlugin = MoproFlutter();
   final ephemeralKey = await getEphemeralKey();
-  print('ephemeralKey: $ephemeralKey');
 
   // Decode the JSON string
   Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);

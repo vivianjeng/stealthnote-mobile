@@ -14,7 +14,8 @@ class Message {
   final String org;
   final DateTime time;
   final String body;
-  final int likes;
+  int likes;
+  int isLiked;
   final bool internal;
 
   Message({
@@ -23,6 +24,7 @@ class Message {
     required this.time,
     required this.body,
     required this.likes,
+    required this.isLiked,
     required this.internal,
   });
 }
@@ -175,8 +177,22 @@ class _MessageCardState extends State<MessageCard> {
             Row(
               children: [
                 IconButton(
-                  onPressed: () => toggleLike(widget.msg.id, true),
-                  icon: const Icon(Icons.thumb_up_alt_outlined, size: 16),
+                  onPressed: () async {
+                    if (widget.msg.isLiked == 0) {
+                      await toggleLike(widget.msg.id, true);
+                      setState(() {
+                        widget.msg.likes++;
+                        widget.msg.isLiked = 1;
+                      });
+                    } else {
+                      await toggleLike(widget.msg.id, false);
+                      setState(() {
+                        widget.msg.likes--;
+                        widget.msg.isLiked = 0;
+                      });
+                    }
+                  },
+                  icon: Icon(widget.msg.isLiked == 1 ? Icons.thumb_up : Icons.thumb_up_alt_outlined, size: 16),
                 ),
                 const SizedBox(width: 4),
                 Text(widget.msg.likes.toString()),

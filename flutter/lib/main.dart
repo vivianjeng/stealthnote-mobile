@@ -51,6 +51,7 @@ class _StealthHomePageState extends State<StealthHomePage> {
           time: DateTime.parse(message['timestamp']),
           body: message['text'],
           likes: message['likes'],
+          isLiked: 0, // TODO: get isLiked from backend
           internal: message['internal'],
         );
         processedMessages.add(msg);

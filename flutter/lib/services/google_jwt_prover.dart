@@ -19,7 +19,6 @@ Future<Uint8List?> generateJwtProof(
   const srsAssetPath = 'assets/jwt-srs.local';
   final srsPath = await moproFlutterPlugin.copyAssetToFileSystem(srsAssetPath);
   final ephemeralKey = await getEphemeralKey();
-  print('ephemeralKey: $ephemeralKey');
 
   // Decode the JSON string
   Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
