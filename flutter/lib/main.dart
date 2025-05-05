@@ -150,17 +150,19 @@ class _StealthHomePageState extends State<StealthHomePage> {
       ),
       body: GestureDetector(
         onTap: () {
-          // Dismiss keyboard when tapping outside text field
           FocusScope.of(context).unfocus();
         },
-        child: ListView(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            SignInCard(),
-            const SizedBox(height: 16),
-            ...messages.map((msg) => MessageCard(msg, key: ValueKey('${msg.id}_$_messageKey'))).toList(),
-          ],
+        child: RefreshIndicator(
+          onRefresh: _loadMessages,
+          child: ListView(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              SignInCard(),
+              const SizedBox(height: 16),
+              ...messages.map((msg) => MessageCard(msg, key: ValueKey('${msg.id}_$_messageKey'))).toList(),
+            ],
+          ),
         ),
       ),
     );
