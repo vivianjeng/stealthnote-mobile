@@ -34,12 +34,12 @@ Future<void> createMessage(
 
     // Send the signed message to the API
     final response = await http.post(
-      Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages'),
+      Uri.parse('https://008f-125-229-173-139.ngrok-free.app/api/messages'),
       headers: {'Content-Type': 'application/json'},
       body: signedMessage,
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       print('Error posting message: ${response.statusCode}');
       print('Response body: ${response.body}');
     }

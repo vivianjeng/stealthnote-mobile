@@ -38,7 +38,6 @@ Future<Uint8List?> generateJwtProof(
       domain,
     );
 
-    print('Proof: ${proof?.proof} Error: ${proof?.error}');
     if (proof == null) {
       throw Exception('Proof is null: ${proof?.error}');
     } else {

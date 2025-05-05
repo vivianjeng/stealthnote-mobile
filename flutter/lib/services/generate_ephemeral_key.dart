@@ -23,3 +23,8 @@ Future<String> getEphemeralKey() async {
   // You can use it safely
   return ephemeralKey;
 }
+
+Future<void> deleteEphemeralKey() async {
+  final secureStorage = FlutterSecureStorage();
+  await secureStorage.delete(key: 'ephemeral_key');
+}

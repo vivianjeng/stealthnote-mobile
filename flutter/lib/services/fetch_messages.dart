@@ -4,11 +4,14 @@ import './generate_ephemeral_key.dart';
 
 Future<dynamic> fetchMessages() async {
   final url = Uri.parse(
-    'https://ac1f-125-229-173-139.ngrok-free.app/api/messages?limit=5',
+    'https://008f-125-229-173-139.ngrok-free.app/api/messages?limit=5',
   );
 
   try {
-    final response = await http.get(url);
+    final response = await http.get(
+      url,
+      headers: {'Cache-Control': 'no-cache', 'Pragma': 'no-cache'},
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -33,7 +36,7 @@ Future<dynamic> fetchMessage(String id, bool isInternal) async {
   }
 
   final response = await http.get(
-    Uri.parse('https://ac1f-125-229-173-139.ngrok-free.app/api/messages/$id'),
+    Uri.parse('https://008f-125-229-173-139.ngrok-free.app/api/messages/$id'),
     headers: headers,
   );
 

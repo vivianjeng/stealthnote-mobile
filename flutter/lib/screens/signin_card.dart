@@ -170,8 +170,8 @@ class _SignInCardState extends State<SignInCard> {
                           IconButton(
                             icon: Icon(Icons.refresh),
                             onPressed: () async {
-                              await _signInWithGoogle();
                               await _authService.signOut();
+                              await _signInWithGoogle();
                             },
                           ),
                           IconButton(
