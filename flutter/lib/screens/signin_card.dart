@@ -45,7 +45,6 @@ class _SignInCardState extends State<SignInCard> {
 
     try {
       final ephemeralKey = await getEphemeralKey();
-      print('ephemeralKey: $ephemeralKey');
 
       // Decode the JSON string
       Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
@@ -170,8 +169,8 @@ class _SignInCardState extends State<SignInCard> {
                           IconButton(
                             icon: Icon(Icons.refresh),
                             onPressed: () async {
-                              await _signInWithGoogle();
                               await _authService.signOut();
+                              await _signInWithGoogle();
                             },
                           ),
                           IconButton(

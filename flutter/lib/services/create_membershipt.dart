@@ -16,7 +16,7 @@ Future<void> createMembership(
   Map<String, dynamic> proofArgs,
 ) async {
   final url = Uri.parse(
-    'https://ac1f-125-229-173-139.ngrok-free.app/api/memberships',
+    'https://008f-125-229-173-139.ngrok-free.app/api/memberships',
   ); // replace with your server
 
   final publicInputsLen = 2720;

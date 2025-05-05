@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'fetch_googleJWTpubKey.dart';
+import 'generate_ephemeral_key.dart';
 import 'google_jwt_prover.dart';
 
 Map<String, dynamic> parseJwtHeader(String? idToken) {
@@ -199,6 +200,7 @@ class AuthService {
     try {
       await _googleSignIn.signOut();
       await _auth.signOut();
+      await deleteEphemeralKey();
     } catch (e) {
       print('Error signing out: $e');
       rethrow;
