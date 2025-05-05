@@ -31,7 +31,7 @@ class Message {
 
 class MessageCard extends StatefulWidget {
   final Message msg;
-  MessageCard(this.msg);
+  const MessageCard(this.msg, {Key? key}) : super(key: key);
 
   @override
   _MessageCardState createState() => _MessageCardState();
@@ -57,6 +57,8 @@ class _MessageCardState extends State<MessageCard> {
   }
 
   Future<void> _copyAssets() async {
+    if (!mounted) return;
+    
     setState(() {
       _status = 'Copying assets...';
       _errorMessage = null;
@@ -71,12 +73,16 @@ class _MessageCardState extends State<MessageCard> {
         srsAssetPath,
       );
 
+      if (!mounted) return;
+      
       setState(() {
         _srsPath = srsPath;
         _status = 'Assets copied successfully. Ready.';
         _isBusy = false;
       });
     } catch (e) {
+      if (!mounted) return;
+      
       setState(() {
         _status = 'Error copying assets';
         _errorMessage = e.toString();

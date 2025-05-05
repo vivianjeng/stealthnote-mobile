@@ -47,13 +47,13 @@ class _SignInCardState extends State<SignInCard> {
       final ephemeralKey = await getEphemeralKey();
 
       // Decode the JSON string
-      Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
-      final ephemeral_pubkey = ephemeral_key_obj['public_key'];
-      final ephemeral_expiry = ephemeral_key_obj['expiry'];
-      final ephemeral_pubkey_hash = ephemeral_key_obj['pubkey_hash'];
+      Map<String, dynamic> ephemeralKeyObj = jsonDecode(ephemeralKey);
+      final ephemeralPubkey = ephemeralKeyObj['public_key'];
+      final ephemeralExpiry = ephemeralKeyObj['expiry'];
+      final ephemeralPubkeyHash = ephemeralKeyObj['pubkey_hash'];
 
       final String? idToken = await _authService.signInManually(
-        ephemeral_pubkey_hash,
+        ephemeralPubkeyHash,
       );
       final credential = GoogleAuthProvider.credential(idToken: idToken);
       final UserCredential? userCredential = await _authService
@@ -100,8 +100,8 @@ class _SignInCardState extends State<SignInCard> {
       // create membership
       final proofArgs = {"keyId": header['kid'], "jwtCircuitVersion": "0.3.1"};
       await createMembership(
-        ephemeral_pubkey,
-        ephemeral_expiry,
+        ephemeralPubkey,
+        ephemeralExpiry,
         sliceEmail(payload['email']),
         "google-oauth",
         proof!,
