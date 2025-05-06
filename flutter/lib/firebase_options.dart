@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAHKORjAv-9ppLZ0dK_tYpQ7nonentkRd8',
-    appId: '1:194338782167:android:b604f2d9ea16272807a992',
+    appId: '1:194338782167:android:b6a9dca2b10c529f07a992',
     messagingSenderId: '194338782167',
     projectId: 'stealthnote-mobile',
     storageBucket: 'stealthnote-mobile.firebasestorage.app',
@@ -59,10 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDNowr4RKTLKAQNlElJIwb-DxAL1mHgXmE',
-    appId: '1:194338782167:ios:396dd29061c709e207a992',
+    appId: '1:194338782167:ios:737502664c77826f07a992',
     messagingSenderId: '194338782167',
     projectId: 'stealthnote-mobile',
     storageBucket: 'stealthnote-mobile.firebasestorage.app',
-    iosBundleId: 'com.example.moproFlutterExample',
+    androidClientId: '194338782167-r1n8prmmln1qbhktdktdsj81518nhtl8.apps.googleusercontent.com',
+    iosClientId: '194338782167-aacck5o9nallmmoecroq46fu4uhrqir7.apps.googleusercontent.com',
+    iosBundleId: 'org.pse.stealthnoteMobile',
   );
+
 }

@@ -131,6 +131,7 @@ class AuthService {
       return await googleUser.authentication;
     } catch (e) {
       print('Error getting Google authentication: $e');
+      await deleteEphemeralKey();
       rethrow; // Rethrow to let the UI layer handle the error
     }
   }

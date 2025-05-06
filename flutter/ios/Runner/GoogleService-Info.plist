@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com</string>
+	<string>194338782167-aacck5o9nallmmoecroq46fu4uhrqir7.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.194338782167-745t4ocob6cprhno894c59l3a9lgifgm</string>
+	<string>com.googleusercontent.apps.194338782167-aacck5o9nallmmoecroq46fu4uhrqir7</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>194338782167-r1n8prmmln1qbhktdktdsj81518nhtl8.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDNowr4RKTLKAQNlElJIwb-DxAL1mHgXmE</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.moproFlutterExample</string>
+	<string>org.pse.stealthnoteMobile</string>
 	<key>PROJECT_ID</key>
 	<string>stealthnote-mobile</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:194338782167:ios:396dd29061c709e207a992</string>
+	<string>1:194338782167:ios:737502664c77826f07a992</string>
 </dict>
 </plist>

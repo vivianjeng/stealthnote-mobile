@@ -9,9 +9,13 @@ Future<String> getEphemeralKey() async {
   String? ephemeralKey = await secureStorage.read(key: 'ephemeral_key');
 
   if (ephemeralKey == null) {
-    // Generate new ephemeral key
-    ephemeralKey = await moproFlutterPlugin.generateEphemeralKey();
-
+    try {
+      // Generate new ephemeral key
+      ephemeralKey = await moproFlutterPlugin.generateEphemeralKey();
+    } catch (e) {
+      print('Error generating ephemeral key: $e');
+      throw e;
+    }
     // Save it securely
     await secureStorage.write(key: 'ephemeral_key', value: ephemeralKey);
   } else {

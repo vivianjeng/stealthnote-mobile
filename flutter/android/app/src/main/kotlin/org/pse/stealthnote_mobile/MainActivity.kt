@@ -1,4 +1,4 @@
-package com.example.mopro_flutter_example
+package org.pse.stealthnote_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
