@@ -240,7 +240,17 @@ class _StealthHomePageState extends State<StealthHomePage> {
             controller: _scrollController,
             padding: const EdgeInsets.all(16.0),
             children: [
-              SignInCard(),
+              SignInCard(
+                isInternal: isInternal,
+                onPostSuccess: () {
+                  setState(() {
+                    messages = [];
+                    _oldestMessageTime = null;
+                    _hasMoreMessages = true;
+                  });
+                  _loadMessages();
+                },
+              ),
               const SizedBox(height: 16),
               ...messages.map((msg) => MessageCard(msg, key: ValueKey('${msg.id}_$_messageKey'))).toList(),
               if (_isLoadingMore)
