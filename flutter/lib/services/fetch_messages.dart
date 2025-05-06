@@ -18,7 +18,7 @@ Future<dynamic> fetchMessages({
   };
 
   final url = Uri.parse(
-    'https://008f-125-229-173-139.ngrok-free.app/api/messages',
+    'https://stealthnote.xyz/api/messages',
   ).replace(queryParameters: queryParams);
 
   try {
@@ -75,7 +75,7 @@ Future<dynamic> fetchMessage(String id, bool isInternal) async {
   }
 
   final response = await http.get(
-    Uri.parse('https://008f-125-229-173-139.ngrok-free.app/api/messages/$id'),
+    Uri.parse('https://stealthnote.xyz/api/messages/$id'),
     headers: headers,
   );
 
