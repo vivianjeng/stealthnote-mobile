@@ -14,6 +14,50 @@
       },
       "oauth_client": [
         {
+          "client_id": "194338782167-r1n8prmmln1qbhktdktdsj81518nhtl8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mopro_flutter_example",
+            "certificate_hash": "192dfeadcd6a1aa77c09d05855a94520c6836b1f"
+          }
+        },
+        {
+          "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHKORjAv-9ppLZ0dK_tYpQ7nonentkRd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.moproFlutterExample"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194338782167:android:b6a9dca2b10c529f07a992",
+        "android_client_info": {
+          "package_name": "org.pse.stealthnote_mobile"
+        }
+      },
+      "oauth_client": [
+        {
           "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
           "client_type": 3
         }
