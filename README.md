@@ -1,24 +1,37 @@
-# Noir with Mopro
+# Stealthnote Mobile
 
-This project demonstrates how to integrate a Noir circuit with the mopro CLI to generate platform bindings.
-See how to install mopro CLI: [Getting started](https://zkmopro.org/docs/getting-started).
+This project is inspired by [stealthnote.xyz](https://stealthnote.xyz). Our goal is to build on the core idea of StealthNote while significantly enhancing performance and user experience using [Mopro](https://zkmopro.org). By leveraging native execution, our implementation achieves at least **~10×** faster performance compared to the browser-based version — as demonstrated in our [benchmarks](#-benchmarks).
 
-## 📚 Prepare Noir Circuits
+## 🎯 Features
 
-1. Compile your circuit using the Noir compiler to generate the bytecode and SRS files.
+-   **Sign in with Google OAuth**: When a user signs in with Google on StealthNote, an ephemeral key is generated. The platform then requests a JWT from Google OAuth to prove ownership of the user's email address, using the hash of the ephemeral key as a nonce. A Noir proof is generated to attest to the validity of the JWT and the nonce, and this proof is submitted to the server. Upon verification, the server creates a membership record tied to the user's organizational email.
 
-2. Replace the existing [`srs.local`](./public/srs.local) and [bytecode file](./circuit/zkemail_test.json) in the example app with the newly generated ones.
+-   **Create note**: After signing in with Google OAuth and storing the ephemeral key, users can use the key to post content on the platform.
 
-> [!WARNING]  
-> The bytecode file only needs to be updated once in [`src/lib.rs`](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/src/lib.rs#L53).
-> The srs.local file must be updated separately for each platform:
->
-> -   iOS: [ios/MoproApp/ContentView.swift](https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/ios/MoproApp/ContentView.swift#L93)
-> -   Android: [android/app/src/main/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/android/app/src/main/assets/srs.local)
-> -   React Native: [react-native/app/(tabs)/index.tsx](<https://github.com/zkmopro/mopro-zkemail-nr/blob/1c013fd803179eca7a0f0a14a4df87bc973f6c69/react-native/app/(tabs)/index.tsx#L16>)
-> -   Flutter: [flutter/assets/srs.local](https://github.com/zkmopro/mopro-zkemail-nr/blob/main/flutter/assets/srs.local)
+-   **Toggle likes**: Just like creating a note, users can use their ephemeral public key to toggle likes on the platform.
+
+-   **Verify proofs**: Each message box includes a "Verify" button, allowing any user to verify the corresponding Noir proof stored in the database and confirm its authenticity via Google OAuth.
+
+-   **Internal chat**: Internal chats are visible only to members of the same organization who choose to post internally. Stealthnote uses the user's ephemeral public key to authenticate message posting and retrieval.
+
+## 💻 How it is made?
+
+-   **Rust:** All cryptographic functions are implemented in Rust, as the ecosystem offers a richer set of libraries and better performance compared to Flutter. Below is an overview of our implementation.
+
+    -   `generate_ephemeral_key()`: Stealthnote uses an ephemeral key for performing actions and verifying membership. We implemented Ed25519 signature functionality and hashes in Rust to ensure secure and efficient cryptographic operations.
+    -   `prove_jwt()`: The `prove_jwt` function extracts the necessary data for the Noir circuit and invokes the [noir-rs](https://github.com/zkmopro/noir-rs) proof generation function to produce a valid Noir proof.
+    -   `verify_jwt_proof()`: The `verify_jwt_proof` function retrieves inputs from the database, formats them for the Noir circuit, and uses noir-rs to verify the corresponding proof.
+
+-   **Mopro:** Mopro generates native bindings for iOS and Android, allowing the Flutter app to call Rust-defined functions simply by replacing the generated bindings.
+-   **Flutter:** Flutter is used to build our cross-platform frontend. It handles the Google authentication flow to obtain a JWT, and communicates with the Stealthnote.xyz APIs to interact with the backend.
 
 ## 🔧 Build the Bindings
+
+Mopro simplifies generating native mobile bindings through the mopro CLI. The following example demonstrates how to update the bindings when changes are made to the underlying [Rust functions](./src/lib.rs). This allows developers to focus solely on maintaining the Rust functions, while automatically ensuring cross-platform support.
+
+### Install Mopro CLI
+
+Follow the [Getting Started](https://zkmopro.org/docs/getting-started) page to install `mopro` CLI.
 
 ### iOS
 
@@ -49,33 +62,6 @@ and select `aarch64-linux-android`
 
 ## 🔄 Manually Update Bindings
 
-### iOS
-
-Copy the generated `MoproiOSBindings` directory into your iOS project:
-
-```sh
-cp -r MoproiOSBindings ios
-```
-
-### Android
-
-Copy the generated files into your Android project:
-
-```sh
-cp -r MoproAndroidBindings/uniffi android/app/src/main/java && \
-cp -r MoproAndroidBindings/jniLibs android/app/src/main
-```
-
-### React Native
-
-Copy the generated files into your React Native project:
-
-```sh
-cp -r MoproiOSBindings react-native/modules/mopro/ios && \
-cp -r MoproAndroidBindings/uniffi react-native/modules/mopro/android/src/main/java && \
-cp -r MoproAndroidBindings/jniLibs react-native/modules/mopro/android/src/main
-```
-
 ### Flutter
 
 Copy the generated files into your Flutter project:
@@ -89,36 +75,6 @@ cp -r MoproAndroidBindings/jniLibs flutter/mopro_flutter_plugin/android/src/main
 ## 📂 Open the project
 
 Follow the instructions to open the development tools
-
-### iOS
-
-```sh
-open ios/MoproApp.xcodeproj
-```
-
-### Android
-
-```sh
-open android -a Android\ Studio
-```
-
-### React Native
-
-```sh
-cd react-native && npm install
-```
-
-For iOS device:
-
-```sh
-npm run ios
-```
-
-For Android device/simulator:
-
-```sh
-npm run android
-```
 
 ### Flutter
 
@@ -147,9 +103,11 @@ npm run android
 
 ## 📊 Benchmarks
 
-The following benchmarks were conducted on Apple M3 chips in release mode:
+The following benchmarks were conducted on iPhone and Android in release mode:
 
-| zkEmail Operation | iOS, Time (ms) | Android, Time (ms) |
-| ----------------- | -------------- | ------------------ |
-| Proof Generation  | 1309           | 3826               |
-| Verification      | 962            | 2857               |
+| JWT Operation              | Prove    | Verify  |
+| -------------------------- | -------- | ------- |
+| Browser                    | 37.292 s | 0.286 s |
+| Desktop (Mac M1 Pro)       | 2.02 s   | 0.007 s |
+| Android emulator (Pixel 8) | 4.786 s  | 3.013 s |
+| iPhone 16 Pro              | 2.626 s  | 1.727 s |
