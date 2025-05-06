@@ -2,6 +2,10 @@
 
 This project is inspired by [stealthnote.xyz](https://stealthnote.xyz). Our goal is to build on the core idea of StealthNote while significantly enhancing performance and user experience using [Mopro](https://zkmopro.org). By leveraging native execution, our implementation achieves at least **~10×** faster performance compared to the browser-based version — as demonstrated in our [benchmarks](#-benchmarks).
 
+## 📺 Demo video
+
+<iframe width="560" height="315" src="https://youtube.com/embed/ngUAfYgLj0M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## 🎯 Features
 
 -   **Sign in with Google OAuth**: When a user signs in with Google on StealthNote, an ephemeral key is generated. The platform then requests a JWT from Google OAuth to prove ownership of the user's email address, using the hash of the ephemeral key as a nonce. A Noir proof is generated to attest to the validity of the JWT and the nonce, and this proof is submitted to the server. Upon verification, the server creates a membership record tied to the user's organizational email.
