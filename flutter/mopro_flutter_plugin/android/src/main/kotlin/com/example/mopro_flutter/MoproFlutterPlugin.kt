@@ -15,6 +15,7 @@ import uniffi.mopro.proveJwt
 import uniffi.mopro.verifyJwtProof
 import uniffi.mopro.EphemeralKey
 import uniffi.mopro.signMessage
+import uniffi.mopro.generateEphemeralKey
 
 /** MoproFlutterPlugin */
 class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
@@ -50,9 +51,9 @@ class MoproFlutterPlugin : FlutterPlugin, MethodCallHandler {
                 val jwt = call.argument<String>("jwt")
                 val domain = call.argument<String>("domain")
     
-                if (srsPath == null || inputs == null) {
+                if (srsPath == null || ephemeralPublicKey == null || ephemeralSalt == null || ephemeralExpiry == null || tokenId == null || jwt == null || domain == null) {
                   launch(Dispatchers.Main) {
-                    result.error("INVALID_ARGUMENTS", "srsPath or inputs is null", null)
+                    result.error("INVALID_ARGUMENTS", "srsPath or ephemeralPublicKey or ephemeralSalt or ephemeralExpiry or tokenId or jwt or domain is null", null)
                   }
                   return@launch
                 }
