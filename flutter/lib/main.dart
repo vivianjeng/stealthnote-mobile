@@ -44,6 +44,9 @@ class _StealthHomePageState extends State<StealthHomePage> {
   bool isInternal = false;
   User? _user;
   int _messageKey = 0;
+  bool _isLoadingMore = false;
+  bool _hasMoreMessages = true;
+  DateTime? _oldestMessageTime;
 
   @override
   void initState() {
@@ -55,6 +58,16 @@ class _StealthHomePageState extends State<StealthHomePage> {
         _user = user;
       });
     });
+    // Add scroll listener
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
+        !_isLoadingMore && 
+        _hasMoreMessages) {
+      _loadMoreMessages();
+    }
   }
 
   String sliceEmail(dynamic email) {
@@ -69,7 +82,7 @@ class _StealthHomePageState extends State<StealthHomePage> {
       }
       final fetchedMessages = await fetchMessages(
           limit: 5, isInternal: isInternal, groupId: groupId);
-      if (fetchedMessages != null) {
+      if (fetchedMessages != null && fetchedMessages.isNotEmpty) {
         List<Message> processedMessages = [];
         for (var message in fetchedMessages) {
           final msg = Message(
@@ -86,16 +99,72 @@ class _StealthHomePageState extends State<StealthHomePage> {
         setState(() {
           messages = processedMessages;
           _messageKey++;
+          _oldestMessageTime = processedMessages.last.time;
+          _hasMoreMessages = fetchedMessages.length >= 5; // If we got less than limit, no more messages
         });
       }
     } catch (e) {
       print('Error loading messages: $e');
-      // Optionally show an error message to the user
+    }
+  }
+
+  Future<void> _loadMoreMessages() async {
+    if (_isLoadingMore || !_hasMoreMessages || _oldestMessageTime == null) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      String? groupId = null;
+      if (isInternal && _user != null) {
+        groupId = sliceEmail(_user!.email);
+      }
+      
+      final fetchedMessages = await fetchMessages(
+        limit: 5,
+        isInternal: isInternal,
+        groupId: groupId,
+        beforeTimestamp: _oldestMessageTime!.millisecondsSinceEpoch,
+      );
+
+      if (fetchedMessages != null && fetchedMessages.isNotEmpty) {
+        List<Message> newMessages = [];
+        for (var message in fetchedMessages) {
+          final msg = Message(
+            id: message['id'],
+            org: message['anonGroupId'],
+            time: DateTime.parse(message['timestamp']),
+            body: message['text'],
+            likes: message['likes'],
+            isLiked: 0,
+            internal: message['internal'],
+          );
+          newMessages.add(msg);
+        }
+
+        setState(() {
+          messages.addAll(newMessages);
+          _oldestMessageTime = newMessages.last.time;
+          _hasMoreMessages = fetchedMessages.length >= 5; // If we got less than limit, no more messages
+        });
+      } else {
+        setState(() {
+          _hasMoreMessages = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading more messages: $e');
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+      });
     }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
@@ -123,6 +192,9 @@ class _StealthHomePageState extends State<StealthHomePage> {
                 Navigator.pop(context);
                 setState(() {
                   isInternal = false;
+                  messages = [];
+                  _oldestMessageTime = null;
+                  _hasMoreMessages = true;
                 });
                 _loadMessages();
               },
@@ -134,6 +206,9 @@ class _StealthHomePageState extends State<StealthHomePage> {
                   Navigator.pop(context);
                   setState(() {
                     isInternal = true;
+                    messages = [];
+                    _oldestMessageTime = null;
+                    _hasMoreMessages = true;
                   });
                   _loadMessages();
                 },
@@ -150,17 +225,50 @@ class _StealthHomePageState extends State<StealthHomePage> {
       ),
       body: GestureDetector(
         onTap: () {
-          // Dismiss keyboard when tapping outside text field
           FocusScope.of(context).unfocus();
         },
-        child: ListView(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            SignInCard(),
-            const SizedBox(height: 16),
-            ...messages.map((msg) => MessageCard(msg, key: ValueKey('${msg.id}_$_messageKey'))).toList(),
-          ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              messages = [];
+              _oldestMessageTime = null;
+              _hasMoreMessages = true;
+            });
+            await _loadMessages();
+          },
+          child: ListView(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              SignInCard(
+                isInternal: isInternal,
+                onPostSuccess: () {
+                  setState(() {
+                    messages = [];
+                    _oldestMessageTime = null;
+                    _hasMoreMessages = true;
+                  });
+                  _loadMessages();
+                },
+              ),
+              const SizedBox(height: 16),
+              ...messages.map((msg) => MessageCard(msg, key: ValueKey('${msg.id}_$_messageKey'))).toList(),
+              if (_isLoadingMore)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              if (!_hasMoreMessages && messages.isNotEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text('No more messages'),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

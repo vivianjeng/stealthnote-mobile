@@ -13,7 +13,7 @@ Future<bool> toggleLike(String messageId, bool like) async {
     final ephemeralPubkey = ephemeralKeyObj['public_key'];
 
     final url = Uri.parse(
-      'https://stealthnote.xyz/api/likes',
+      'https://008f-125-229-173-139.ngrok-free.app/api/likes',
     );
 
     final response = await http.post(

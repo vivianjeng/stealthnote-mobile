@@ -17,6 +17,13 @@ import '../services/google_jwt_prover.dart';
 import '../services/jwt_prover.dart';
 
 class SignInCard extends StatefulWidget {
+  final VoidCallback onPostSuccess;
+  final bool isInternal;
+
+  const SignInCard(
+      {Key? key, required this.onPostSuccess, required this.isInternal})
+      : super(key: key);
+
   @override
   _SignInCardState createState() => _SignInCardState();
 }
@@ -56,8 +63,8 @@ class _SignInCardState extends State<SignInCard> {
         ephemeralPubkeyHash,
       );
       final credential = GoogleAuthProvider.credential(idToken: idToken);
-      final UserCredential? userCredential = await _authService
-          .signInWithGoogle(credential);
+      final UserCredential? userCredential =
+          await _authService.signInWithGoogle(credential);
 
       if (userCredential != null && userCredential.user != null) {
         // Navigate to BottomNavBar instead of directly to HomePage
@@ -188,10 +195,13 @@ class _SignInCardState extends State<SignInCard> {
                                 createMessage(
                                   text,
                                   sliceEmail(snapshot.data!.email),
-                                  false, // internal
-                                );
-                                _textController
-                                    .clear(); // Clear the text field after posting
+                                  widget.isInternal, // internal
+                                ).then((_) {
+                                  _textController
+                                      .clear(); // Clear the text field after posting
+                                  widget
+                                      .onPostSuccess(); // Call the callback after successful post
+                                });
                               }
                             },
                             child: Text('Post'),

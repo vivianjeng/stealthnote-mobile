@@ -15,10 +15,10 @@ Future<void> createMessage(
   final ephemeralKey = await getEphemeralKey();
 
   // Decode the JSON string
-  Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
-  final ephemeral_pubkey = ephemeral_key_obj['public_key'];
-  final ephemeral_expiry = ephemeral_key_obj['expiry'];
-  final ephemeral_private_key = ephemeral_key_obj['private_key'];
+  Map<String, dynamic> ephemeralKeyObj = jsonDecode(ephemeralKey);
+  final ephemeralPubkey = ephemeralKeyObj['public_key'];
+  final ephemeralExpiry = ephemeralKeyObj['expiry'];
+  final ephemeralPrivateKey = ephemeralKeyObj['private_key'];
   print('content: $content');
 
   try {
@@ -26,14 +26,14 @@ Future<void> createMessage(
       anonGroupId,
       content,
       internal,
-      ephemeral_pubkey,
-      ephemeral_private_key,
-      ephemeral_expiry,
+      ephemeralPubkey,
+      ephemeralPrivateKey,
+      ephemeralExpiry,
     );
 
     // Send the signed message to the API
     final response = await http.post(
-      Uri.parse('https://stealthnote.xyz/api/messages'),
+      Uri.parse('https://008f-125-229-173-139.ngrok-free.app/api/messages'),
       headers: {'Content-Type': 'application/json'},
       body: signedMessage,
     );
