@@ -58,6 +58,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "194338782167-bdnpo5vuv8cvntpacclkv9ke4r3jngo9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.pse.stealthnote_mobile",
+            "certificate_hash": "192dfeadcd6a1aa77c09d05855a94520c6836b1f"
+          }
+        },
+        {
           "client_id": "194338782167-d0o10a22i76f4shdmg7bn4o8t0uls82p.apps.googleusercontent.com",
           "client_type": 3
         }
