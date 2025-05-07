@@ -66,9 +66,9 @@ class AuthService {
   Future<String> signInManually(String nonce) async {
     final state = generateState();
     // App specific variables
-    final googleClientId =
+    const googleClientId =
         '194338782167-745t4ocob6cprhno894c59l3a9lgifgm.apps.googleusercontent.com';
-    final callbackUrlScheme =
+    const callbackUrlScheme =
         'com.googleusercontent.apps.194338782167-745t4ocob6cprhno894c59l3a9lgifgm';
 
     final authUrl = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
