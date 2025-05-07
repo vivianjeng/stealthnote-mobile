@@ -2,3 +2,4 @@ target/
 build/
 MoproAndroidBindings/
 MoproiOSBindings/
+.DS_Store
