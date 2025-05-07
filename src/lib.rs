@@ -272,7 +272,13 @@ fn verify_jwt_proof(
 
 #[uniffi::export]
 pub fn generate_ephemeral_key() -> String {
-    let ephemeral_key = EphemeralKey::generate_ephemeral_key().unwrap();
+    let ephemeral_key = loop {
+        if let Some(key) = EphemeralKey::generate_ephemeral_key() {
+            break key;
+        } else {
+            println!("Failed to generate ephemeral key, retrying...");
+        }
+    };
     let json_obj = HashMap::from([
         (
             "private_key".to_string(),

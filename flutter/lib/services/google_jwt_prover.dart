@@ -21,17 +21,17 @@ Future<Uint8List?> generateJwtProof(
   final ephemeralKey = await getEphemeralKey();
 
   // Decode the JSON string
-  Map<String, dynamic> ephemeral_key_obj = jsonDecode(ephemeralKey);
-  final ephemeral_pubkey = ephemeral_key_obj['public_key'];
-  final ephemeral_salt = ephemeral_key_obj['salt'];
-  final ephemeral_expiry = ephemeral_key_obj['expiry'];
+  Map<String, dynamic> ephemeralKeyObj = jsonDecode(ephemeralKey);
+  final ephemeralPubkey = ephemeralKeyObj['public_key'];
+  final ephemeralSalt = ephemeralKeyObj['salt'];
+  final ephemeralExpiry = ephemeralKeyObj['expiry'];
 
   try {
     final proof = await moproFlutterPlugin.proveJwt(
       srsPath,
-      ephemeral_pubkey,
-      ephemeral_salt,
-      ephemeral_expiry,
+      ephemeralPubkey,
+      ephemeralSalt,
+      ephemeralExpiry,
       idToken,
       jwt,
       domain,
