@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="stealthnote_mobile"
+        android:label="Stealthnote"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
     >
