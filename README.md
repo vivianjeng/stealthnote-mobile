@@ -4,6 +4,9 @@
 <a href="https://testflight.apple.com/join/8hqYwe8C"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
 alt="Demo of the Nextcloud iOS files app"
 height="40"></a>
+<a href="https://drive.google.com/file/d/1GkgaDTTc1isDHJ9bezDCuatVRZWeDsQo/view?usp=sharing"><img src="https://i.imgur.com/kct14sr.png"
+alt="Demo of the Nextcloud iOS files app"
+height="40"></a>
 </p>
 
 This project is inspired by [stealthnote.xyz](https://stealthnote.xyz). Our goal is to build on the core idea of StealthNote while significantly enhancing performance and user experience using [Mopro](https://zkmopro.org). By leveraging native execution, our implementation achieves at least **~10×** faster performance compared to the browser-based version — as demonstrated in our [benchmarks](#-benchmarks).
