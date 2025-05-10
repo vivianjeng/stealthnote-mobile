@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../services/fetch_messages.dart';
 import '../services/fetch_googleJWTpubKey.dart';
@@ -178,7 +179,7 @@ class _MessageCardState extends State<MessageCard> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(widget.msg.body),
+            MarkdownBody(data: widget.msg.body),
             const SizedBox(height: 8),
             Row(
               children: [

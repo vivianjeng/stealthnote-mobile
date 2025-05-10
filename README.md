@@ -114,6 +114,18 @@ Follow the instructions to open the development tools
     flutter run
     ```
 
+## Markdown Support
+
+Stealthnote Mobile supports a variety of Markdown features for rich text formatting in your notes. You can use common Markdown syntax to create headers, lists, bold and italic text, links, and more.
+
+Below is an example of how Markdown is rendered in the app:
+
+<p align="center">
+ <a href="https://i.imgur.com/vcfzPmT.png"><img src="https://i.imgur.com/vcfzPmT.png" alt="Markdown Example" width="300"/></a>
+    <br>
+    <em>Stealthnote Mobile Support Markdown</em>
+</p>
+
 ## 📊 Benchmarks
 
 The following benchmarks were conducted on iPhone and Android in release mode:

@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:markdown_editor_plus/markdown_editor_plus.dart';
 import '../firebase_options.dart';
 import '../services/auth_service.dart';
 import '../services/create_membershipt.dart';
@@ -33,6 +34,11 @@ class _SignInCardState extends State<SignInCard> {
   final moproFlutterPlugin = MoproFlutter();
   bool _isLoading = false;
   final TextEditingController _textController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -146,10 +152,11 @@ class _SignInCardState extends State<SignInCard> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
+            MarkdownAutoPreview(
               controller: _textController,
+              emojiConvert: true,
               decoration: InputDecoration(
-                hintText: 'What\'s happening at your company?',
+                hintText: "What's happening at your company?",
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
