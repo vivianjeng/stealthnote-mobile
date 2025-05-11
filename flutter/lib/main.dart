@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/signin_card.dart';
 import 'screens/message_card.dart';
 import 'services/fetch_messages.dart';
@@ -14,6 +15,9 @@ import 'services/auth_service.dart';
 void main() async {
   // Initialize Flutter binding
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Initialize Firebase - make sure you've added the necessary configuration files
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
