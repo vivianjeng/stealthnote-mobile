@@ -116,15 +116,28 @@ Follow the instructions to open the development tools
 
 ## Markdown Support
 
-Stealthnote Mobile supports a variety of Markdown features for rich text formatting in your notes. You can use common Markdown syntax to create headers, lists, bold and italic text, links, and more.
+Stealthnote Mobile supports a variety of Markdown features for rich text formatting in your notes. You can use common Markdown syntax to create headers, lists, bold and italic text, links, images, and more.
 
 Below is an example of how Markdown is rendered in the app:
 
-<p align="center">
- <a href="https://i.imgur.com/vcfzPmT.png"><img src="https://i.imgur.com/vcfzPmT.png" alt="Markdown Example" width="300"/></a>
-    <br>
-    <em>Stealthnote Mobile Support Markdown</em>
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://i.imgur.com/vcfzPmT.png" target="_blank" rel="noopener noreferrer">
+        <img src="https://i.imgur.com/vcfzPmT.png" alt="Stealthnote Mobile Markdown Example" width="300"/>
+      </a>
+      <br />
+      <sub><b>Markdown Support</b></sub>
+    </td>
+    <td align="center">
+      <a href="https://www.youtube.com/shorts/WIQ39OWBxv8" target="_blank" rel="noopener noreferrer">
+        <img src="https://i.imgur.com/l13v0Yq.png" alt="Stealthnote Web Example" width="300"/>
+      </a>
+      <br />
+      <sub><b>Image Support</b></sub>
+    </td>
+  </tr>
+</table>
 
 ## 📊 Benchmarks
 
