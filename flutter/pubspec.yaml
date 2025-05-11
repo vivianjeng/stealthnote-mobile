@@ -40,6 +40,8 @@ dependencies:
   flutter_web_auth_2: ^4.1.0
   flutter_markdown: ^0.7.1
   markdown_editor_plus: ^0.2.15
+  flutter_dotenv: ^5.2.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   integration_test:
@@ -71,6 +73,7 @@ flutter:
     - assets/jwt_input.json
     - assets/jwt-srs.local
     - assets/google.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

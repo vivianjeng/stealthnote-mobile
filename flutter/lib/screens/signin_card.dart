@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,6 +9,7 @@ import 'package:mopro_flutter/mopro_flutter.dart';
 import 'package:mopro_flutter/mopro_flutter_platform_interface.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:markdown_editor_plus/markdown_editor_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import '../firebase_options.dart';
 import '../services/auth_service.dart';
 import '../services/create_membershipt.dart';
@@ -16,6 +18,7 @@ import '../services/fetch_googleJWTpubKey.dart';
 import '../services/generate_ephemeral_key.dart';
 import '../services/google_jwt_prover.dart';
 import '../services/jwt_prover.dart';
+import '../services/upload_image.dart';
 
 class SignInCard extends StatefulWidget {
   final VoidCallback onPostSuccess;
@@ -33,7 +36,10 @@ class _SignInCardState extends State<SignInCard> {
   final AuthService _authService = AuthService();
   final moproFlutterPlugin = MoproFlutter();
   bool _isLoading = false;
+  bool _isUploadingImage = false;
   final TextEditingController _textController = TextEditingController();
+  XFile? _selectedImageFile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -46,9 +52,71 @@ class _SignInCardState extends State<SignInCard> {
     super.dispose();
   }
 
-  // Google Sign-In function using AuthService
-  // Update the _signInWithGoogle method in _SignInPageState class to navigate to HomePage
-  // Then update the _signInWithGoogle method:
+  Future<void> _pickImage() async {
+    if (_isUploadingImage) return;
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _selectedImageFile = image;
+    });
+  }
+
+  void _clearImage() {
+    if (_isUploadingImage) return;
+    setState(() {
+      _selectedImageFile = null;
+    });
+  }
+
+  Future<void> _initiateImageUpload(String anonGroupId) async {
+    if (_selectedImageFile == null || _isUploadingImage) return;
+
+    setState(() {
+      _isUploadingImage = true;
+    });
+
+    final imagePath = _selectedImageFile!.path;
+
+    try {
+      File imageFile = File(imagePath);
+      String? imageUrl = await uploadToImgur(imageFile);
+
+      if (mounted && imageUrl != null) {
+        String currentText = _textController.text;
+        String imageMarkdown = '![image]($imageUrl)';
+        
+        if (currentText.isEmpty) {
+          _textController.text = imageMarkdown;
+        } else {
+          String newText = currentText.endsWith('\n') ? currentText : currentText + '\n';
+          _textController.text = newText + imageMarkdown;
+        }
+        
+        _textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _textController.text.length),
+        );
+
+        _selectedImageFile = null;
+      } else if (mounted && imageUrl == null) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image upload failed: Could not get image URL.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image upload failed: ${e.toString()}')),
+        );
+      }
+      print('Error uploading image: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingImage = false;
+        });
+      }
+    }
+  }
+
   Future<void> _signInWithGoogle() async {
     if (mounted) {
       setState(() {
@@ -59,7 +127,6 @@ class _SignInCardState extends State<SignInCard> {
     try {
       final ephemeralKey = await getEphemeralKey();
 
-      // Decode the JSON string
       Map<String, dynamic> ephemeralKeyObj = jsonDecode(ephemeralKey);
       final ephemeralPubkey = ephemeralKeyObj['public_key'];
       final ephemeralExpiry = ephemeralKeyObj['expiry'];
@@ -73,9 +140,7 @@ class _SignInCardState extends State<SignInCard> {
           await _authService.signInWithGoogle(credential);
 
       if (userCredential != null && userCredential.user != null) {
-        // Navigate to BottomNavBar instead of directly to HomePage
         if (mounted) {
-          // Store user information (you may want to save this in a shared preferences or state management)
           final String userEmail = userCredential.user!.email!;
           final String? displayName = userCredential.user!.displayName;
 
@@ -87,7 +152,6 @@ class _SignInCardState extends State<SignInCard> {
           );
         }
       } else {
-        // User cancelled the sign-in flow
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -98,8 +162,6 @@ class _SignInCardState extends State<SignInCard> {
         }
       }
 
-      // generate jwt proof
-      // final idToken = googleAuth.idToken;
       final header = parseJwtHeader(idToken);
       final payload = parseJwtPayload(idToken);
       final googlePublicKey = await fetchGooglePublicKey(header['kid']);
@@ -110,7 +172,6 @@ class _SignInCardState extends State<SignInCard> {
         sliceEmail(payload['email']),
       );
 
-      // create membership
       final proofArgs = {"keyId": header['kid'], "jwtCircuitVersion": "0.3.1"};
       await createMembership(
         ephemeralPubkey,
@@ -121,7 +182,6 @@ class _SignInCardState extends State<SignInCard> {
         proofArgs,
       );
     } catch (e) {
-      // Handle any errors that occur during the sign-in process
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -132,7 +192,6 @@ class _SignInCardState extends State<SignInCard> {
       }
       print('Error signing in with Google: $e');
     } finally {
-      // Reset loading state
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -145,100 +204,154 @@ class _SignInCardState extends State<SignInCard> {
     return email.substring(email.indexOf('@') + 1);
   }
 
+  Widget _buildImageSelectionRow(User? currentUser) {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(Icons.attach_file),
+          onPressed: _isUploadingImage ? null : _pickImage,
+          tooltip: 'Attach image',
+        ),
+        if (_selectedImageFile != null)
+          Expanded(
+            child: Row(
+              children: [
+                Icon(Icons.image_outlined, color: Colors.grey[700]),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedImageFile!.name,
+                    style: TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(width: 4),
+                if (_isUploadingImage)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                else if (currentUser != null)
+                  TextButton(
+                    onPressed: () => _initiateImageUpload(sliceEmail(currentUser.email!)),
+                    child: Text("Upload Image"),
+                  ),
+                IconButton(
+                  icon: Icon(Icons.close, size: 18),
+                  onPressed: _isUploadingImage ? null : _clearImage,
+                  tooltip: 'Remove image',
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            MarkdownAutoPreview(
-              controller: _textController,
-              emojiConvert: true,
-              decoration: InputDecoration(
-                hintText: "What's happening at your company?",
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-              maxLines: 5,
-              minLines: 3,
-            ),
-            const SizedBox(height: 12),
-            StreamBuilder<User?>(
-              stream: _authService.authStateChanges,
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: StreamBuilder<User?>(
+          stream: _authService.authStateChanges,
+          builder: (context, snapshot) {
+            final User? currentUser = snapshot.data;
+            return Column(
+              children: [
+                MarkdownAutoPreview(
+                  controller: _textController,
+                  emojiConvert: true,
+                  decoration: InputDecoration(
+                    hintText: "What's happening at your company?",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  maxLines: 5,
+                  minLines: 3,
+                ),
+                const SizedBox(height: 12),
+                _buildImageSelectionRow(currentUser),
+                const SizedBox(height: 12),
+                if (currentUser != null) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Posting as \"Someone from ${sliceEmail(snapshot.data!.email)}\"",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.refresh),
-                            onPressed: () async {
-                              await _authService.signOut();
-                              await _signInWithGoogle();
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close),
-                            onPressed: () async {
-                              await _authService.signOut();
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Access the text when the post button is pressed
-                              final text = _textController.text;
-                              if (text.isNotEmpty) {
-                                createMessage(
-                                  text,
-                                  sliceEmail(snapshot.data!.email),
-                                  widget.isInternal, // internal
-                                ).then((_) {
-                                  _textController
-                                      .clear(); // Clear the text field after posting
-                                  widget
-                                      .onPostSuccess(); // Call the callback after successful post
-                                });
+                      Expanded(
+                        child: Text(
+                          "Posting as \"Someone from ${sliceEmail(currentUser.email)}\"",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.refresh),
+                        onPressed: _isLoading ? null : () async {
+                          setState(() => _isLoading = true);
+                          await _authService.signOut();
+                          await _signInWithGoogle();
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: _isLoading ? null : () async {
+                          await _authService.signOut();
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _isLoading || _isUploadingImage ? null : () {
+                          final text = _textController.text;
+                          if (text.isNotEmpty || _selectedImageFile != null) {
+                            setState(() => _isLoading = true);
+                            createMessage(
+                              text,
+                              sliceEmail(currentUser.email!),
+                              widget.isInternal,
+                              _selectedImageFile?.path,
+                            ).then((returnedMessageContent) {
+                              if (mounted) {
+                                _textController.text = returnedMessageContent;
+                                if (_selectedImageFile != null) {
+                                   _selectedImageFile = null;
+                                }
+                                widget.onPostSuccess();
                               }
-                            },
-                            child: Text('Post'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF3730A3),
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ],
+                            }).catchError((e) {
+                               if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Failed to post: ${e.toString()}')));
+                               }
+                            }).whenComplete(() {
+                              if (mounted) {
+                                setState(() => _isLoading = false);
+                              }
+                            });
+                          }
+                        },
+                        child: _isLoading && !_isUploadingImage
+                            ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : Text('Post'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF3730A3),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
                       ),
                     ],
-                  );
-                } else {
-                  return Row(
+                  ),
+                ] else ...[
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Expanded(
                         child: Text(
                           'Sign in with your Google work account to anonymously post as "Someone from your company".',
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 14),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -246,36 +359,32 @@ class _SignInCardState extends State<SignInCard> {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          onTap: _signInWithGoogle,
-                          child: Container(
-                            padding: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
+                          onTap: _isLoading ? null : _signInWithGoogle,
+                          child: _isLoading
+                              ? Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: SizedBox(width: 36, height: 36, child: CircularProgressIndicator()),
+                                )
+                              : Container(
+                                  padding: EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                                    ],
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: Image.asset('assets/google.png', width: 36, height: 36),
                                 ),
-                              ],
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: Image.asset(
-                              'assets/google.png',
-                              width: 36,
-                              height: 36,
-                            ),
-                          ),
                         ),
                       ),
                     ],
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
