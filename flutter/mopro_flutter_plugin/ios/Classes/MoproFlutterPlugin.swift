@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import moproFFI
 
 public class MoproFlutterPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {

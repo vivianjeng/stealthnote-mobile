@@ -138,3 +138,14 @@ The following benchmarks were conducted on iPhone and Android in release mode:
 | Desktop (Mac M1 Pro)       | 2.02 s   | 0.007 s |
 | Android emulator (Pixel 8) | 4.786 s  | 3.013 s |
 | iPhone 16 Pro              | 2.626 s  | 1.727 s |
+
+## ⚙️ Problem shooting
+
+If there is an error like
+
+```sh
+E/AndroidRuntime(12683): java.lang.UnsatisfiedLinkError: Native library (com/sun/jna/android-aarch64/libjnidispatch.so) not found in resource path (.)
+```
+
+Please download the `libjnidispatch.so` from e.g. [mopro-kotlin-package](https://github.com/zkmopro/mopro-kotlin-package/tree/main/lib/src/main/jniLibs) <br/>
+and place the `libjnidispatch.so` to corresponding folder e.g. `flutter/android/app/src/main/jniLibs/arm64-v8a`
